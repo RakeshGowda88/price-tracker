@@ -368,11 +368,12 @@
         }
 
         function getDirectStoreUrl(product, storeName) {
+            // Always route to the retailer's direct site search URL to avoid direct bot-blocking / 403 walls
             const r = retailers.find(ret => ret.name === storeName);
             if (r && r.searchUrl) {
                 return r.searchUrl + encodeURIComponent(product.title);
             }
-            return `https://www.google.com/search?q=${encodeURIComponent(product.title + ' ' + storeName)}`;
+            return product.addedUrl;
         }
 
         function handleAddProduct(e) {
@@ -842,4 +843,25 @@
                 targetPrice: 500.00,
                 currentLowest: 327.95,
                 lowestStore: "Bunnings",
-                storePrices
+                storePrices: {
+                    "Bunnings": 327.95,
+                    "Amazon AU": 548.00,
+                    "Costco AU": 529.00,
+                    "JB Hi-Fi": 549.00,
+                    "Harvey Norman": 548.00,
+                    "Officeworks": 549.00,
+                    "Temu": 512.00,
+                    "AliExpress": 495.00
+                },
+                history: [
+                    { date: "1 Mar", price: 580.00 },
+                    { date: "5 Mar", price: 569.00 },
+                    { date: "10 Mar", price: 555.00 },
+                    { date: "14 Mar", price: 548.00 },
+                    { date: "Today", price: 327.95 }
+                ]
+            }];
+        }
+    </script>
+</body>
+</html>
