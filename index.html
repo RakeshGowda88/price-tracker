@@ -368,19 +368,21 @@
         }
 
         function getDirectStoreUrl(product, storeName) {
+            // If the user's added URL matches this store domain, link straight to the product page
             try {
-                const sourceHost = new URL(product.addedUrl).hostname.toLowerCase();
-                const cleanStoreName = storeName.toLowerCase().replace(/[^a-z]/g, '');
-                if (sourceHost.includes(cleanStoreName) || (sourceHost.includes('adidas') && cleanStoreName.includes('adidas'))) {
+                const sourceUrlObj = new URL(product.addedUrl);
+                const r = retailers.find(ret => ret.name === storeName);
+                if (r && sourceUrlObj.hostname.toLowerCase().includes(r.domain.toLowerCase())) {
                     return product.addedUrl;
                 }
             } catch(e) {}
 
+            // Otherwise, route to the retailer's direct site search URL with the product name
             const r = retailers.find(ret => ret.name === storeName);
             if (r && r.searchUrl) {
                 return r.searchUrl + encodeURIComponent(product.title);
             }
-            return `https://www.google.com/search?q=${encodeURIComponent(product.title + ' ' + storeName)}`;
+            return product.addedUrl;
         }
 
         function handleAddProduct(e) {
@@ -482,20 +484,17 @@
             const lowerTitle = productTitle.toLowerCase();
 
             retailers.forEach(r => {
-                prices[r.name] = null;
+                prices[r.name] = null; // Default all stores to Not Listed
             });
 
             if (lowerTitle.includes('runfalcon') || lowerTitle.includes('shoes')) {
-                prices["Adidas Australia"] = 42.00;
+                prices["Adidas Australia"] = 39.00;
                 prices["Amazon AU"] = 45.00;
-                prices["Kmart"] = 39.00;
-                prices["Temu"] = 38.50;
             } else if (lowerTitle.includes('pressure washer') || lowerTitle.includes('2030 psi')) {
                 prices["Bunnings"] = 199.00;
                 prices["Amazon AU"] = 215.00;
                 prices["Harvey Norman"] = 219.00;
                 prices["Officeworks"] = 209.00;
-                prices["Temu"] = 189.00;
             } else if (lowerTitle.includes('sony') || lowerTitle.includes('headphone')) {
                 prices["Bunnings"] = 327.95;
                 prices["Amazon AU"] = 548.00;
