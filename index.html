@@ -326,20 +326,30 @@
             }
         }
 
-        // --- EXACT LINK ROUTING LOGIC INTEGRATED HERE ---
+        // --- ROBUST LINK ROUTING LOGIC ---
         function getDirectStoreUrl(product, storeName) {
-            const r = retailers.find(ret => ret.name === storeName);
-            const isSourceStore = product.sourceStore && storeName === product.sourceStore && product.addedUrl;
+            const r = retailers.find(ret => ret.name.toLowerCase() === storeName.toLowerCase());
             
-            // If it's the exact store the URL was pasted from, open the direct product page safely
-            if (isSourceStore) {
+            let isCurrentStoreLink = false;
+            if (product.addedUrl) {
+                try {
+                    const u = new URL(product.addedUrl);
+                    const hostname = u.hostname.replace(/^www\./, '').toLowerCase();
+                    if (r && (hostname === r.domain || hostname.endsWith('.' + r.domain))) {
+                        isCurrentStoreLink = true;
+                    }
+                } catch (e) {}
+            }
+
+            if (isCurrentStoreLink || (product.sourceStore && storeName.toLowerCase() === product.sourceStore.toLowerCase())) {
                 return product.addedUrl;
             }
-            // Otherwise, use the retailer's search catalog URL
+
             if (r && r.searchUrl) {
                 return r.searchUrl + encodeURIComponent(product.title);
             }
-            return product.addedUrl || 'https://www.google.com';
+            
+            return 'https://www.google.com/search?q=' + encodeURIComponent(product.title + ' ' + storeName);
         }
 
         function handleAddProduct(e) {
@@ -368,7 +378,7 @@
                     category: meta.category,
                     image: meta.image,
                     addedUrl: urlInput,
-                    sourceStore: meta.sourceStore, // Saved explicitly for proper link mapping
+                    sourceStore: meta.sourceStore,
                     addedDate: new Date().toISOString(),
                     isDemo: false,
                     targetPrice: Math.round(lowestPrice * 0.90),
@@ -561,7 +571,7 @@
                 const isLowest = price === product.currentLowest && price !== null;
                 const diff = (price !== null && !isLowest) ? (price - product.currentLowest) : null;
                 const storeLink = getDirectStoreUrl(product, r.name);
-                const isOwnStore = r.name === product.sourceStore && product.addedUrl;
+                const isOwnStore = (r.name.toLowerCase() === (product.sourceStore || '').toLowerCase()) && product.addedUrl;
 
                 return `
                     <tr class="border-b border-gray-800 hover:bg-gray-900/50 transition">
