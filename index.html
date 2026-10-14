@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Australian Retail Price Tracker</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,9 +20,9 @@
             }
         }
     </script>
-    <!-- FontAwesome & Chart.js -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Pinned FontAwesome & Chart.js CDNs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="bg-darkbg text-gray-100 min-h-screen font-sans flex flex-col antialiased">
 
@@ -46,7 +46,7 @@
                     <i class="fa-solid fa-plus"></i>
                     <span>Add Product</span>
                 </button>
-                <button onclick="openSettingsModal()" class="p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition" title="Settings / API Key">
+                <button onclick="openSettingsModal()" class="p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition" title="Settings">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
@@ -56,7 +56,7 @@
     <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        <!-- Top Shelf: Retailer Cross-Search Banner & Add Retailer -->
+        <!-- Retailer Banner -->
         <div class="bg-darkcard border border-darkborder rounded-2xl p-6 shadow-xl relative overflow-hidden">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div class="space-y-1">
@@ -69,22 +69,15 @@
                     <h2 class="text-xl font-bold text-white">Track Prices Across Australian Retailers</h2>
                     <p class="text-sm text-gray-400">Paste any URL to scan live AUD prices across major AU marketplaces and stores.</p>
                 </div>
-
-                <div class="flex items-center gap-3">
-                    <button onclick="openAddRetailerModal()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2">
-                        <i class="fa-solid fa-plus-circle text-green-400"></i>
-                        <span>+ Add Retailer</span>
-                    </button>
-                </div>
+                <button onclick="openAddRetailerModal()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 w-fit">
+                    <i class="fa-solid fa-plus-circle text-green-400"></i>
+                    <span>+ Add Retailer</span>
+                </button>
             </div>
-
-            <!-- Retailer Badges List -->
-            <div id="retailerChipsContainer" class="mt-5 flex flex-wrap gap-2 pt-4 border-t border-gray-800">
-                <!-- Dynamically Rendered Retailer Chips -->
-            </div>
+            <div id="retailerChipsContainer" class="mt-5 flex flex-wrap gap-2 pt-4 border-t border-gray-800"></div>
         </div>
 
-        <!-- Metrics Overview Dashboard -->
+        <!-- Metrics Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div class="bg-darkcard border border-darkborder p-5 rounded-2xl flex items-center space-x-4">
                 <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl">
@@ -117,14 +110,12 @@
             </div>
         </div>
 
-        <!-- Products Section Header & Search/Filter Controls -->
+        <!-- Search & Filters -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-            <div>
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <span>Tracked Items</span>
-                    <span id="productCountBadge" class="text-xs bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-full font-mono">0</span>
-                </h3>
-            </div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span>Tracked Items</span>
+                <span id="productCountBadge" class="text-xs bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-full font-mono">0</span>
+            </h3>
             
             <div class="flex items-center space-x-3">
                 <div class="relative flex-1 sm:w-64">
@@ -139,9 +130,7 @@
         </div>
 
         <!-- Product Grid -->
-        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Dynamically populated product cards -->
-        </div>
+        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
         <!-- Empty State View -->
         <div id="emptyState" class="hidden bg-darkcard border border-darkborder border-dashed rounded-2xl p-12 text-center max-w-md mx-auto my-8">
@@ -162,9 +151,7 @@
     <footer class="bg-darkcard border-t border-darkborder py-6 mt-12 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p>Personal Australian Price Tracker &copy; 2026. All prices in AUD ($A).</p>
-            <p class="flex items-center space-x-1">
-                <span>Data stored locally in your browser</span>
-            </p>
+            <p>Data stored locally in your browser</p>
         </div>
     </footer>
 
@@ -181,29 +168,21 @@
                         <p class="text-xs text-gray-400">Paste product link to cross-check AU stores</p>
                     </div>
                 </div>
-                <button onclick="closeAddProductModal()" class="text-gray-500 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+                <button onclick="closeAddProductModal()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <form id="addProductForm" onsubmit="handleAddProduct(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-300 mb-1.5">Product Page URL <span class="text-red-400">*</span></label>
                     <input type="url" id="inputProductUrl" required placeholder="https://www.adidas.com.au/runfalcon-3.0-hook-and-loop-shoes/HP5866.html" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition">
-                    <p class="text-[11px] text-gray-500 mt-1.5">Supports Adidas, Bunnings, Amazon AU, JB Hi-Fi, Officeworks, Harvey Norman, and all major AU sellers.</p>
                 </div>
-
                 <div id="urlScanLoader" class="hidden bg-gray-900/80 border border-gray-800 rounded-xl p-4 text-center space-y-2">
-                    <div class="inline-block animate-spin text-green-400 text-xl">
-                        <i class="fa-solid fa-circle-notch"></i>
-                    </div>
+                    <div class="inline-block animate-spin text-green-400 text-xl"><i class="fa-solid fa-circle-notch"></i></div>
                     <p class="text-xs text-gray-300 font-medium">Analyzing Product & Scanning AU Retailers...</p>
-                    <p class="text-[10px] text-gray-500">Cross-checking prices across 14+ Australian marketplaces</p>
                 </div>
-
                 <div class="flex items-center justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeAddProductModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold transition">Cancel</button>
-                    <button type="submit" id="submitAddBtn" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold transition shadow-lg shadow-green-600/20 flex items-center space-x-2">
+                    <button type="button" onclick="closeAddProductModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
+                    <button type="submit" id="submitAddBtn" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-green-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <span>Track Product</span>
                     </button>
@@ -215,13 +194,8 @@
     <!-- PRODUCT DETAIL MODAL -->
     <div id="productDetailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-darkcard border border-darkborder w-full max-w-4xl rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
-            <button onclick="closeProductDetailModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-
-            <div id="detailModalContent">
-                <!-- Dynamically Populated Details -->
-            </div>
+            <button onclick="closeProductDetailModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div id="detailModalContent"></div>
         </div>
     </div>
 
@@ -229,26 +203,21 @@
     <div id="addRetailerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-darkcard border border-darkborder w-full max-w-md rounded-2xl p-6 shadow-2xl relative space-y-5">
             <div class="flex items-center justify-between border-b border-gray-800 pb-4">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-store text-green-400"></i> Add Custom Retailer
-                </h3>
-                <button onclick="closeAddRetailerModal()" class="text-gray-500 hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-store text-green-400"></i> Add Custom Retailer</h3>
+                <button onclick="closeAddRetailerModal()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
             <form id="addRetailerForm" onsubmit="handleAddRetailer(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-300 mb-1">Retailer Name</label>
-                    <input type="text" id="newRetailerName" required placeholder="e.g. Myer, David Jones, Bing Lee" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-green-500">
+                    <input type="text" id="newRetailerName" required placeholder="e.g. Myer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">Domain / Website URL</label>
-                    <input type="text" id="newRetailerDomain" required placeholder="e.g. myer.com.au" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-green-500">
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Domain URL</label>
+                    <input type="text" id="newRetailerDomain" required placeholder="e.g. myer.com.au" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white">
                 </div>
                 <div class="flex justify-end space-x-3 pt-2">
                     <button type="button" onclick="closeAddRetailerModal()" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-green-600/20">Add Store</button>
+                    <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold">Add Store</button>
                 </div>
             </form>
         </div>
@@ -258,36 +227,22 @@
     <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-darkcard border border-darkborder w-full max-w-md rounded-2xl p-6 shadow-2xl relative space-y-5">
             <div class="flex items-center justify-between border-b border-gray-800 pb-4">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-gear text-green-400"></i> Tracker Settings
-                </h3>
-                <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-green-400"></i> Tracker Settings</h3>
+                <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">Gemini / Search API Key (Optional)</label>
-                    <input type="password" id="apiKeyInput" placeholder="AI_ZAsy..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-green-500">
-                    <p class="text-[11px] text-gray-500 mt-1">Provides direct web grounding for real-time live AU retail search results.</p>
-                </div>
-
                 <div class="pt-2 border-t border-gray-800 flex items-center justify-between">
                     <span class="text-xs text-gray-400">Reset Tracker Data</span>
-                    <button onclick="clearAllData()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg text-xs font-semibold transition">
-                        Restore Default Sample
-                    </button>
+                    <button onclick="clearAllData()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg text-xs font-semibold transition">Restore Demo Sample</button>
                 </div>
             </div>
-
             <div class="flex justify-end pt-2">
-                <button onclick="saveSettings()" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-green-600/20">Save Settings</button>
+                <button onclick="closeSettingsModal()" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- APP LOGIC & JAVASCRIPT -->
+    <!-- CORE SCRIPT -->
     <script>
         const DEFAULT_RETAILERS = [
             { name: "Adidas Australia", domain: "adidas.com.au", searchUrl: "https://www.adidas.com.au/search?q=", icon: "fa-solid fa-shoe-prints", color: "text-white" },
@@ -300,16 +255,22 @@
             { name: "Chemist Warehouse", domain: "chemistwarehouse.com.au", searchUrl: "https://www.chemistwarehouse.com.au/search?searchtext=", icon: "fa-solid fa-prescription-bottle-medical", color: "text-red-400" },
             { name: "Woolworths", domain: "woolworths.com.au", searchUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=", icon: "fa-solid fa-apple-whole", color: "text-green-500" },
             { name: "Coles", domain: "coles.com.au", searchUrl: "https://www.coles.com.au/search?q=", icon: "fa-solid fa-basket-shopping", color: "text-red-600" },
-            { name: "Aldi", domain: "aldi.com.au", searchUrl: "https://www.aldi.com.au/en/search/?q=", icon: "fa-solid fa-store", color: "text-blue-400" },
-            { name: "Temu", domain: "temu.com", searchUrl: "https://www.temu.com/search_result.html?search_key=", icon: "fa-solid fa-bag-shopping", color: "text-orange-400" },
-            { name: "AliExpress", domain: "aliexpress.com", searchUrl: "https://www.aliexpress.com/w/wholesale-", icon: "fa-solid fa-globe", color: "text-red-500" },
-            { name: "Kmart", domain: "kmart.com.au", searchUrl: "https://www.kmart.com.au/search/?searchTerm=", icon: "fa-solid fa-shop", color: "text-red-500" },
-            { name: "Shein", domain: "shein.com.au", searchUrl: "https://au.shein.com/pdsearch/", icon: "fa-solid fa-shirt", color: "text-pink-400" }
+            { name: "Kmart", domain: "kmart.com.au", searchUrl: "https://www.kmart.com.au/search/?searchTerm=", icon: "fa-solid fa-shop", color: "text-red-500" }
         ];
 
         let retailers = [];
         let products = [];
         let detailChartInstance = null;
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             loadStorage();
@@ -325,9 +286,7 @@
 
                 const savedProducts = localStorage.getItem('aus_track_products');
                 products = (savedProducts && savedProducts !== "undefined") ? JSON.parse(savedProducts) : getSampleProducts();
-                if (!Array.isArray(products) || products.length === 0) {
-                    products = getSampleProducts();
-                }
+                if (!Array.isArray(products)) products = getSampleProducts();
 
                 products.forEach(recalculateLowest);
             } catch (e) {
@@ -337,7 +296,7 @@
         }
 
         function recalculateLowest(p) {
-            const valid = Object.entries(p.storePrices)
+            const valid = Object.entries(p.storePrices || {})
                 .filter(([store, price]) => price !== null && price > 0)
                 .sort((a, b) => a[1] - b[1]);
 
@@ -360,20 +319,27 @@
             if (container) {
                 container.innerHTML = retailers.map(r => `
                     <div class="bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1 flex items-center space-x-2 text-xs text-gray-300">
-                        <i class="${r.icon} ${r.color}"></i>
-                        <span>${r.name}</span>
+                        <i class="${escapeHtml(r.icon)} ${escapeHtml(r.color)}"></i>
+                        <span>${escapeHtml(r.name)}</span>
                     </div>
                 `).join('');
             }
         }
 
+        // --- EXACT LINK ROUTING LOGIC INTEGRATED HERE ---
         function getDirectStoreUrl(product, storeName) {
-            // Always route to the retailer's direct site search URL to avoid direct bot-blocking / 403 walls
             const r = retailers.find(ret => ret.name === storeName);
+            const isSourceStore = product.sourceStore && storeName === product.sourceStore && product.addedUrl;
+            
+            // If it's the exact store the URL was pasted from, open the direct product page safely
+            if (isSourceStore) {
+                return product.addedUrl;
+            }
+            // Otherwise, use the retailer's search catalog URL
             if (r && r.searchUrl) {
                 return r.searchUrl + encodeURIComponent(product.title);
             }
-            return product.addedUrl;
+            return product.addedUrl || 'https://www.google.com';
         }
 
         function handleAddProduct(e) {
@@ -389,7 +355,7 @@
 
             setTimeout(() => {
                 const meta = parseProductFromUrl(urlInput);
-                const storePrices = generateStorePrices(meta.title, urlInput);
+                const storePrices = generateStorePrices(meta.title);
 
                 const validPrices = Object.values(storePrices).filter(v => v !== null && v > 0);
                 const lowestPrice = validPrices.length > 0 ? Math.min(...validPrices) : 39.00;
@@ -402,7 +368,9 @@
                     category: meta.category,
                     image: meta.image,
                     addedUrl: urlInput,
+                    sourceStore: meta.sourceStore, // Saved explicitly for proper link mapping
                     addedDate: new Date().toISOString(),
+                    isDemo: false,
                     targetPrice: Math.round(lowestPrice * 0.90),
                     currentLowest: lowestPrice,
                     lowestStore: lowestStore,
@@ -424,20 +392,20 @@
         }
 
         function parseProductFromUrl(url) {
-            let title = "Australian Tracked Product";
+            let title = "Tracked Item";
             let category = "General Merchandise";
             let image = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80";
             let sourceStore = "Amazon AU";
 
             const lowerUrl = url.toLowerCase();
-
             try {
                 const urlObj = new URL(url);
-                if (urlObj.hostname.includes('adidas')) sourceStore = "Adidas Australia";
-                else if (urlObj.hostname.includes('bunnings')) sourceStore = "Bunnings";
-                else if (urlObj.hostname.includes('amazon')) sourceStore = "Amazon AU";
-                else if (urlObj.hostname.includes('jbhifi')) sourceStore = "JB Hi-Fi";
-                else if (urlObj.hostname.includes('officeworks')) sourceStore = "Officeworks";
+                const hostname = urlObj.hostname.toLowerCase();
+                
+                const matchedRetailer = retailers.find(r => hostname === r.domain || hostname.endsWith('.' + r.domain));
+                if (matchedRetailer) {
+                    sourceStore = matchedRetailer.name;
+                }
 
                 const pathSegments = urlObj.pathname.split('/').filter(p => p.length > 0);
                 for (let seg of pathSegments) {
@@ -446,56 +414,40 @@
                         break;
                     }
                 }
-                if (title === "Australian Tracked Product" && pathSegments.length > 0) {
-                    let fallbackSeg = pathSegments[0].replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-                    if (fallbackSeg.length > 3) title = fallbackSeg;
-                }
                 title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
             } catch(e) {}
 
-            if (lowerUrl.includes('runfalcon') || lowerUrl.includes('hp5866') || lowerUrl.includes('shoes')) {
+            if (lowerUrl.includes('runfalcon') || lowerUrl.includes('hp5866')) {
                 title = "Runfalcon 3.0 Hook and Loop Shoes";
                 category = "Footwear & Kids";
                 image = "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&auto=format&fit=crop&q=80";
+                sourceStore = "Adidas Australia";
             } else if (lowerUrl.includes('pressure-washer') || lowerUrl.includes('0637292')) {
                 title = "Ryobi 2030 PSI Compact High Pressure Washer";
-                category = "Cleaning & Tools";
+                category = "Tools & Hardware";
                 image = "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&auto=format&fit=crop&q=80";
-            } else if (lowerUrl.includes('sony') || lowerUrl.includes('wh-1000xm5')) {
-                title = "Sony WH-1000XM5 Wireless Noise Cancelling Headphones";
-                category = "Electronics";
-                image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80";
+                sourceStore = "Bunnings";
             }
 
             return { title, category, image, sourceStore };
         }
 
-        function generateStorePrices(productTitle, sourceUrl) {
+        function generateStorePrices(productTitle) {
             const prices = {};
             retailers.forEach(r => { prices[r.name] = null; });
-
             const lowerTitle = productTitle.toLowerCase();
 
             if (lowerTitle.includes('runfalcon') || lowerTitle.includes('shoes')) {
                 prices["Adidas Australia"] = 39.00;
                 prices["Amazon AU"] = 45.00;
-            } else if (lowerTitle.includes('pressure washer') || lowerTitle.includes('2030 psi')) {
+            } else if (lowerTitle.includes('washer') || lowerTitle.includes('ryobi')) {
                 prices["Bunnings"] = 199.00;
                 prices["Amazon AU"] = 215.00;
-                prices["Harvey Norman"] = 219.00;
                 prices["Officeworks"] = 209.00;
-            } else if (lowerTitle.includes('sony') || lowerTitle.includes('headphone')) {
-                prices["Bunnings"] = 327.95;
-                prices["Amazon AU"] = 548.00;
-                prices["Costco AU"] = 529.00;
-                prices["JB Hi-Fi"] = 549.00;
-                prices["Harvey Norman"] = 548.00;
-                prices["Officeworks"] = 549.00;
             } else {
                 prices["Amazon AU"] = 142.50;
                 prices["Bunnings"] = 149.00;
             }
-
             return prices;
         }
 
@@ -534,26 +486,33 @@
             if (grid) {
                 grid.innerHTML = filtered.map(p => {
                     recalculateLowest(p);
-                    const totalStoresFound = Object.values(p.storePrices).filter(v => v !== null).length;
+                    const totalStoresFound = Object.values(p.storePrices || {}).filter(v => v !== null).length;
+                    const isTargetReached = p.currentLowest <= p.targetPrice;
 
                     return `
                         <div class="bg-darkcard border border-darkborder hover:border-gray-700 rounded-2xl overflow-hidden shadow-xl transition group flex flex-col">
                             <div class="relative h-48 bg-gray-900 overflow-hidden">
-                                <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-darkcard via-transparent to-transparent"></div>
-                                <span class="absolute top-3 left-3 bg-black/65 backdrop-blur-md text-gray-300 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-white/10 uppercase tracking-wider">
-                                    ${p.category}
-                                </span>
+                                <div class="absolute top-3 left-3 flex gap-1.5">
+                                    <span class="bg-black/70 backdrop-blur-md text-gray-300 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-white/10 uppercase">
+                                        ${escapeHtml(p.category)}
+                                    </span>
+                                    ${p.isDemo ? '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-semibold px-2 py-1 rounded-full">Sample / Demo</span>' : ''}
+                                </div>
                             </div>
 
                             <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
                                 <div>
                                     <h4 class="font-bold text-white text-base leading-snug line-clamp-2 group-hover:text-green-400 transition">
-                                        ${p.title}
+                                        ${escapeHtml(p.title)}
                                     </h4>
-                                    <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                                        <i class="fa-solid fa-store text-green-400"></i> Found in <span class="text-gray-200 font-semibold">${totalStoresFound} stores</span>
-                                    </p>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <p class="text-xs text-gray-400 flex items-center gap-1">
+                                            <i class="fa-solid fa-store text-green-400"></i> ${totalStoresFound} stores
+                                        </p>
+                                        ${isTargetReached ? '<span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold animate-pulse">🎯 Target Reached!</span>' : ''}
+                                    </div>
                                 </div>
 
                                 <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-3 flex items-center justify-between">
@@ -563,18 +522,16 @@
                                     </div>
                                     <div class="text-right">
                                         <p class="text-[10px] uppercase font-bold text-gray-500">Lowest At</p>
-                                        <span class="inline-flex items-center text-xs font-semibold text-emerald-400">
-                                            ${p.lowestStore}
-                                        </span>
+                                        <span class="text-xs font-semibold text-emerald-400">${escapeHtml(p.lowestStore)}</span>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center justify-between pt-1 gap-2">
-                                    <button onclick="openProductDetailModal('${p.id}')" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold py-2.5 px-3 rounded-xl transition flex items-center justify-center space-x-1.5 border border-gray-700">
+                                    <button onclick="openProductDetailModal('${escapeHtml(p.id)}')" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold py-2.5 px-3 rounded-xl transition flex items-center justify-center space-x-1.5 border border-gray-700">
                                         <i class="fa-solid fa-chart-line text-green-400"></i>
                                         <span>Compare All Stores</span>
                                     </button>
-                                    <button onclick="deleteProduct('${p.id}')" class="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition border border-transparent hover:border-red-500/20" title="Delete Product">
+                                    <button onclick="deleteProduct('${escapeHtml(p.id)}')" class="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition border border-transparent hover:border-red-500/20" title="Delete">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
@@ -590,7 +547,6 @@
             if (!product) return;
 
             recalculateLowest(product);
-
             const modal = document.getElementById('productDetailModal');
             const container = document.getElementById('detailModalContent');
 
@@ -605,36 +561,26 @@
                 const isLowest = price === product.currentLowest && price !== null;
                 const diff = (price !== null && !isLowest) ? (price - product.currentLowest) : null;
                 const storeLink = getDirectStoreUrl(product, r.name);
+                const isOwnStore = r.name === product.sourceStore && product.addedUrl;
 
                 return `
                     <tr class="border-b border-gray-800 hover:bg-gray-900/50 transition">
                         <td class="py-3 px-4 flex items-center space-x-3">
-                            <i class="${r.icon} ${r.color} text-base"></i>
-                            <span class="font-semibold text-gray-200 text-xs">${r.name}</span>
+                            <i class="${escapeHtml(r.icon)} ${escapeHtml(r.color)} text-base"></i>
+                            <span class="font-semibold text-gray-200 text-xs">${escapeHtml(r.name)}</span>
                         </td>
                         <td class="py-3 px-4">
-                            ${price !== null ? `
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                    <i class="fa-solid fa-check mr-1"></i> In Stock
-                                </span>
-                            ` : `
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-800 text-gray-500">
-                                    Not Listed
-                                </span>
-                            `}
+                            ${price !== null ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">In Stock</span>' : '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-800 text-gray-500">Not Listed</span>'}
                         </td>
                         <td class="py-3 px-4 font-bold ${isLowest ? 'text-emerald-400 text-sm' : 'text-gray-200 text-xs'}">
                             ${price !== null ? `$${price.toFixed(2)} AUD` : '—'}
                         </td>
                         <td class="py-3 px-4 text-xs">
-                            ${isLowest ? `
-                                <span class="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Lowest Price</span>
-                            ` : (diff !== null ? `<span class="text-red-400">+ $${diff.toFixed(2)} AUD</span>` : '—')}
+                            ${isLowest ? '<span class="text-emerald-400 font-bold">Lowest</span>' : (diff !== null ? `<span class="text-red-400">+ $${diff.toFixed(2)}</span>` : '—')}
                         </td>
                         <td class="py-3 px-4 text-right">
-                            <a href="${storeLink}" target="_blank" class="inline-flex items-center space-x-1 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-2.5 py-1 rounded-lg border border-gray-700 transition">
-                                <span>Store</span>
-                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            <a href="${escapeHtml(storeLink)}" target="_blank" class="inline-flex items-center space-x-1 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-2.5 py-1 rounded-lg border border-gray-700 transition">
+                                <span>${isOwnStore ? 'Open page' : 'Search store'}</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                             </a>
                         </td>
                     </tr>
@@ -644,14 +590,18 @@
             if (container) {
                 container.innerHTML = `
                     <div class="flex flex-col md:flex-row items-start gap-6 border-b border-gray-800 pb-6">
-                        <img src="${product.image}" alt="${product.title}" class="w-24 h-24 rounded-2xl object-cover bg-gray-900 border border-gray-800">
+                        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" class="w-24 h-24 rounded-2xl object-cover bg-gray-900 border border-gray-800">
                         <div class="space-y-2 flex-1">
                             <div class="flex items-center space-x-2">
-                                <span class="bg-gray-800 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">${product.category}</span>
-                                <span class="text-xs text-gray-500">Cross-Searched ${retailers.length} Retailers</span>
+                                <span class="bg-gray-800 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">${escapeHtml(product.category)}</span>
+                                ${product.isDemo ? '<span class="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded font-semibold">Sample / Demo</span>' : ''}
                             </div>
-                            <h2 class="text-xl font-bold text-white">${product.title}</h2>
-                            <p class="text-xs text-gray-400">Lowest: <span class="text-emerald-400 font-bold">$${product.currentLowest.toFixed(2)} AUD</span> &bull; Store: <span class="text-emerald-400 font-bold">${product.lowestStore}</span></p>
+                            <h2 class="text-xl font-bold text-white">${escapeHtml(product.title)}</h2>
+                            <p class="text-xs text-gray-400">Lowest: <span class="text-emerald-400 font-bold">$${product.currentLowest.toFixed(2)} AUD</span> &bull; Store: <span class="text-emerald-400 font-bold">${escapeHtml(product.lowestStore)}</span></p>
+                            <div class="flex items-center gap-2 pt-2">
+                                <label class="text-xs text-gray-300 font-semibold">Target Alert Price ($ AUD):</label>
+                                <input type="number" step="0.50" id="editableTargetPrice" value="${product.targetPrice}" onchange="updateTargetPrice('${escapeHtml(product.id)}', this.value)" class="w-24 bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-emerald-400 font-bold focus:outline-none focus:border-green-500">
+                            </div>
                         </div>
                     </div>
 
@@ -663,33 +613,33 @@
                     </div>
 
                     <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Availability & Prices Across All ${retailers.length} Retailers (AUD $)</h4>
-                            <span class="text-[11px] text-gray-500">Sorted by lowest price</span>
-                        </div>
-
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Availability Across All ${retailers.length} Retailers</h4>
                         <div class="overflow-x-auto border border-gray-800 rounded-xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-gray-900/90 border-b border-gray-800 text-[10px] font-bold uppercase text-gray-400">
-                                        <th class="py-2.5 px-4">Retailer</th>
-                                        <th class="py-2.5 px-4">Status</th>
-                                        <th class="py-2.5 px-4">Price (AUD $)</th>
-                                        <th class="py-2.5 px-4">Difference</th>
-                                        <th class="py-2.5 px-4 text-right">Action</th>
+                                        <th class="py-2.5 px-4">Retailer</th><th class="py-2.5 px-4">Status</th><th class="py-2.5 px-4">Price</th><th class="py-2.5 px-4">Difference</th><th class="py-2.5 px-4 text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    ${storeRows}
-                                </tbody>
+                                <tbody>${storeRows}</tbody>
                             </table>
                         </div>
                     </div>
                 `;
             }
 
-            if (modal) modal.classList.remove('hidden');
+            modal.classList.remove('hidden');
             renderDetailChart(product.history);
+        }
+
+        function updateTargetPrice(productId, newTarget) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                product.targetPrice = parseFloat(newTarget) || 0;
+                saveStorage();
+                renderProducts();
+                updateStats();
+            }
         }
 
         function renderDetailChart(history) {
@@ -708,8 +658,7 @@
                         borderColor: '#22c55e',
                         backgroundColor: 'rgba(34, 197, 94, 0.1)',
                         fill: true,
-                        tension: 0.3,
-                        pointBackgroundColor: '#22c55e'
+                        tension: 0.3
                     }]
                 },
                 options: {
@@ -742,67 +691,25 @@
             }
         }
 
-        function openAddRetailerModal() {
-            const form = document.getElementById('addRetailerForm');
-            if (form) form.reset();
-            document.getElementById('addRetailerModal').classList.remove('hidden');
-        }
-
-        function closeAddRetailerModal() {
-            const form = document.getElementById('addRetailerForm');
-            if (form) form.reset();
-            document.getElementById('addRetailerModal').classList.add('hidden');
-        }
-
+        function openAddRetailerModal() { document.getElementById('addRetailerModal').classList.remove('hidden'); }
+        function closeAddRetailerModal() { document.getElementById('addRetailerForm').reset(); document.getElementById('addRetailerModal').classList.add('hidden'); }
         function handleAddRetailer(e) {
             e.preventDefault();
-            const nameInput = document.getElementById('newRetailerName');
-            const domainInput = document.getElementById('newRetailerDomain');
-
-            const name = nameInput ? nameInput.value.trim() : '';
-            const domain = domainInput ? domainInput.value.trim() : '';
-
+            const name = document.getElementById('newRetailerName').value.trim();
+            const domain = document.getElementById('newRetailerDomain').value.trim();
             if (name && domain) {
-                retailers.push({
-                    name: name,
-                    domain: domain,
-                    searchUrl: `https://${domain.replace(/^https?:\/\//, '')}/search?q=`,
-                    icon: "fa-solid fa-store",
-                    color: "text-emerald-400"
-                });
-
-                products.forEach(p => {
-                    p.storePrices[name] = Math.round((p.currentLowest + (Math.random() * 20 - 5)) * 100) / 100;
-                });
-
+                retailers.push({ name, domain, searchUrl: `https://${domain}/search?q=`, icon: "fa-solid fa-store", color: "text-emerald-400" });
                 saveStorage();
                 renderRetailerChips();
                 closeAddRetailerModal();
             }
         }
 
-        function openAddProductModal() {
-            const input = document.getElementById('inputProductUrl');
-            if (input) input.value = '';
-            document.getElementById('addProductModal').classList.remove('hidden');
-        }
-
-        function closeAddProductModal() {
-            const input = document.getElementById('inputProductUrl');
-            if (input) input.value = '';
-            document.getElementById('addProductModal').classList.add('hidden');
-        }
-
+        function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
+        function closeAddProductModal() { document.getElementById('addProductForm').reset(); document.getElementById('addProductModal').classList.add('hidden'); }
         function closeProductDetailModal() { document.getElementById('productDetailModal').classList.add('hidden'); }
         function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
         function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
-
-        function saveSettings() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            localStorage.setItem('aus_track_apikey', key);
-            closeSettingsModal();
-            alert("Settings saved successfully!");
-        }
 
         function deleteProduct(id) {
             if (confirm("Stop tracking this product?")) {
@@ -814,7 +721,7 @@
         }
 
         function clearAllData() {
-            if (confirm("Restore default sample product?")) {
+            if (confirm("Restore sample demo product?")) {
                 products = getSampleProducts();
                 saveStorage();
                 renderProducts();
@@ -828,7 +735,7 @@
             if (icon) icon.classList.add('fa-spin');
             setTimeout(() => {
                 if (icon) icon.classList.remove('fa-spin');
-                alert("All Australian prices refreshed successfully!");
+                alert("Prices refreshed successfully!");
             }, 1000);
         }
 
@@ -838,28 +745,15 @@
                 title: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",
                 category: "Electronics",
                 image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80",
-                addedUrl: "https://www.bunnings.com.au/sony-wh1000xm5-premium-noise-cancelling-wireless-overear-headphones-black_p1048472",
+                addedUrl: "https://www.bunnings.com.au",
+                sourceStore: "Bunnings",
                 addedDate: new Date().toISOString(),
-                targetPrice: 500.00,
+                isDemo: true,
+                targetPrice: 350.00,
                 currentLowest: 327.95,
                 lowestStore: "Bunnings",
-                storePrices: {
-                    "Bunnings": 327.95,
-                    "Amazon AU": 548.00,
-                    "Costco AU": 529.00,
-                    "JB Hi-Fi": 549.00,
-                    "Harvey Norman": 548.00,
-                    "Officeworks": 549.00,
-                    "Temu": 512.00,
-                    "AliExpress": 495.00
-                },
-                history: [
-                    { date: "1 Mar", price: 580.00 },
-                    { date: "5 Mar", price: 569.00 },
-                    { date: "10 Mar", price: 555.00 },
-                    { date: "14 Mar", price: 548.00 },
-                    { date: "Today", price: 327.95 }
-                ]
+                storePrices: { "Bunnings": 327.95, "Amazon AU": 548.00, "JB Hi-Fi": 549.00 },
+                history: [{ date: "1 Mar", price: 580.00 }, { date: "Today", price: 327.95 }]
             }];
         }
     </script>
