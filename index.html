@@ -1,4 +1,225 @@
-<!-- CORE SCRIPT -->
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Australian Retail Price Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0b0f19',
+                        darkcard: '#111827',
+                        darkborder: '#1f2937'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-darkbg text-gray-100 min-h-screen font-sans flex flex-col antialiased">
+    <header class="bg-darkcard border-b border-darkborder sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-green-500/20">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        AusPriceTracker <span class="text-xs bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0.5 rounded-full font-mono">AUD $</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">Personal Multi-Retailer Price Monitor</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="openAddProductModal()" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center space-x-2 shadow-lg shadow-green-600/20">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Product</span>
+                </button>
+                <button onclick="openSettingsModal()" class="p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div class="bg-darkcard border border-darkborder rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                            <i class="fa-solid fa-store mr-1.5 text-xs"></i> Cross-Checking Stores
+                        </span>
+                        <span id="retailerCountBadge" class="text-xs text-gray-400">12 Major Sellers</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Track Prices Across Australian Retailers</h2>
+                    <p class="text-sm text-gray-400">Paste any URL to scan live AUD prices across major AU marketplaces and stores.</p>
+                </div>
+                <button onclick="openAddRetailerModal()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 w-fit">
+                    <i class="fa-solid fa-plus-circle text-green-400"></i>
+                    <span>+ Add Retailer</span>
+                </button>
+            </div>
+            <div id="retailerChipsContainer" class="mt-5 flex flex-wrap gap-2 pt-4 border-t border-gray-800"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-darkcard border border-darkborder p-5 rounded-2xl flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400">Total Products Tracked</p>
+                    <p id="statTotalProducts" class="text-2xl font-bold text-white">0</p>
+                </div>
+            </div>
+            <div class="bg-darkcard border border-darkborder p-5 rounded-2xl flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400">Active Price Alerts</p>
+                    <p id="statActiveAlerts" class="text-2xl font-bold text-white">0</p>
+                </div>
+            </div>
+            <div class="bg-darkcard border border-darkborder p-5 rounded-2xl flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-austral-sign"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400">Average Lowest Price</p>
+                    <p id="statAvgPrice" class="text-2xl font-bold text-white">$0.00 AUD</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span>Tracked Items</span>
+                <span id="productCountBadge" class="text-xs bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-full font-mono">0</span>
+            </h3>
+            <div class="flex items-center space-x-3">
+                <div class="relative flex-1 sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="text" id="searchInput" oninput="renderProducts()" placeholder="Search products..." class="w-full bg-darkcard border border-darkborder rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition">
+                </div>
+                <button onclick="refreshAllPrices()" class="bg-darkcard hover:bg-gray-800 border border-darkborder text-gray-300 px-3 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2" title="Refresh Prices">
+                    <i id="refreshIcon" class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Refresh All</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div id="emptyState" class="hidden bg-darkcard border border-darkborder border-dashed rounded-2xl p-12 text-center max-w-md mx-auto my-8">
+            <div class="w-16 h-16 bg-gray-800/50 text-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <h4 class="text-lg font-bold text-white mb-1">No products added yet</h4>
+            <p class="text-xs text-gray-400 mb-6">Paste a product URL from any Australian online store to start tracking prices across sellers.</p>
+            <button onclick="openAddProductModal()" class="bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition inline-flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Your First Product</span>
+            </button>
+        </div>
+    </main>
+
+    <footer class="bg-darkcard border-t border-darkborder py-6 mt-12 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>Personal Australian Price Tracker &copy; 2026. All prices in AUD ($A).</p>
+            <p>Data stored locally in your browser</p>
+        </div>
+    </footer>
+
+    <div id="addProductModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-darkcard border border-darkborder w-full max-w-lg rounded-2xl p-6 shadow-2xl relative space-y-5">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center">
+                        <i class="fa-solid fa-link"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Add Product URL</h3>
+                        <p class="text-xs text-gray-400">Paste product link to cross-check AU stores</p>
+                    </div>
+                </div>
+                <button onclick="closeAddProductModal()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="addProductForm" onsubmit="handleAddProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">Product Page URL <span class="text-red-400">*</span></label>
+                    <input type="url" id="inputProductUrl" required placeholder="https://www.bigw.com.au/product/sony-wh-1000xm5-..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition">
+                </div>
+                <div id="urlScanLoader" class="hidden bg-gray-900/80 border border-gray-800 rounded-xl p-4 text-center space-y-2">
+                    <div class="inline-block animate-spin text-green-400 text-xl"><i class="fa-solid fa-circle-notch"></i></div>
+                    <p class="text-xs text-gray-300 font-medium">Analyzing Product & Scanning AU Retailers...</p>
+                </div>
+                <div class="flex items-center justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeAddProductModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
+                    <button type="submit" id="submitAddBtn" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-green-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Track Product</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="productDetailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-darkcard border border-darkborder w-full max-w-4xl rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
+            <button onclick="closeProductDetailModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div id="detailModalContent"></div>
+        </div>
+    </div>
+
+    <div id="addRetailerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-darkcard border border-darkborder w-full max-w-md rounded-2xl p-6 shadow-2xl relative space-y-5">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-store text-green-400"></i> Add Custom Retailer</h3>
+                <button onclick="closeAddRetailerModal()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="addRetailerForm" onsubmit="handleAddRetailer(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Retailer Name</label>
+                    <input type="text" id="newRetailerName" required placeholder="e.g. Myer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Domain URL</label>
+                    <input type="text" id="newRetailerDomain" required placeholder="e.g. myer.com.au" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white">
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeAddRetailerModal()" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold">Add Store</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-darkcard border border-darkborder w-full max-w-md rounded-2xl p-6 shadow-2xl relative space-y-5">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-green-400"></i> Tracker Settings</h3>
+                <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div class="pt-2 border-t border-gray-800 flex items-center justify-between">
+                    <span class="text-xs text-gray-400">Reset Tracker Data</span>
+                    <button onclick="clearAllData()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg text-xs font-semibold transition">Restore Demo Sample</button>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeSettingsModal()" class="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-semibold">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const DEFAULT_RETAILERS = [
             { name: "Adidas Australia", domain: "adidas.com.au", searchUrl: "https://www.adidas.com.au/search?q=", icon: "fa-solid fa-shoe-prints", color: "text-white" },
@@ -83,7 +304,6 @@
             }
         }
 
-        // --- BULLETPROOF LINK ROUTING LOGIC ---
         function getDirectStoreUrl(product, storeName) {
             const r = retailers.find(ret => ret.name.toLowerCase() === storeName.toLowerCase());
             
@@ -125,7 +345,7 @@
                 const storePrices = generateStorePrices(meta.title);
 
                 const validPrices = Object.values(storePrices).filter(v => v !== null && v > 0);
-                const lowestPrice = validPrices.length > 0 ? Math.min(...validPrices) : 348.00;
+                const lowestPrice = validPrices.length > 0 ? Math.min(...validPrices) : 347.00;
                 const lowestStore = Object.keys(storePrices).find(key => storePrices[key] === lowestPrice) || meta.sourceStore;
                 const history = generateHistoricalData(lowestPrice);
 
@@ -184,7 +404,6 @@
                 title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
             } catch(e) {}
 
-            // Specific pattern matching for your test URLs
             if (lowerUrl.includes('sony') || lowerUrl.includes('wh-1000xm5')) {
                 title = "Sony WH-1000XM5 Wireless Noise Cancelling Headphones";
                 category = "Electronics & Audio";
@@ -522,7 +741,7 @@
                 title: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",
                 category: "Electronics & Audio",
                 image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80",
-                addedUrl: "https://www.bigw.com.au",
+                addedUrl: "https://www.bigw.com.au/product/sony-wh-1000xm5-premium-noise-cancelling-wireless-over-ear-headphones-silver/p/9901000305",
                 sourceStore: "Big W",
                 addedDate: new Date().toISOString(),
                 isDemo: true,
@@ -534,3 +753,5 @@
             }];
         }
     </script>
+</body>
+</html>
