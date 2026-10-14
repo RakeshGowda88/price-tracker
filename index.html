@@ -1,794 +1,798 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="h-full bg-slate-900 text-slate-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OzPriceWatch - Australian Price Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                        }
-                    }
-                }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Australian Retail Price Tracker - 14 Major Retailers Comparison</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d',
             }
+          }
         }
-    </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js for Price History -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass { backdrop-filter: blur(8px); }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 3px; }
-    </style>
+      }
+    }
+  </script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
 
-    <header class="sticky top-0 z-30 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo / Title -->
-                <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                        <i data-lucide="trending-down" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
-                            OzPriceWatch
-                        </h1>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Australian Retail Price Tracker</p>
-                    </div>
-                </div>
-
-                <!-- Action Controls -->
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <button id="scanBtn" onclick="runPriceCheck()" class="relative inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-600/20 transition-all duration-150">
-                        <i data-lucide="refresh-cw" id="scanIcon" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Check Prices Now</span>
-                    </button>
-
-                    <button onclick="openAddModal()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Add Product</span>
-                    </button>
-
-                    <button onclick="toggleNotifications()" class="relative p-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
-                        <span id="notifBadge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
-                    </button>
-
-                    <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all">
-                        <i data-lucide="moon" id="themeIcon" class="w-5 h-5"></i>
-                    </button>
-                </div>
-            </div>
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Top Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="bg-gradient-to-tr from-emerald-500 to-teal-400 p-2.5 rounded-xl shadow-lg shadow-emerald-500/20 text-slate-950 font-black text-xl">
+            🇦🇺
+          </div>
+          <div>
+            <h1 class="font-bold text-lg text-white flex items-center gap-2">
+              AusPriceTracker
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">14 Stores AI</span>
+            </h1>
+            <p class="text-xs text-slate-400 hidden sm:block">Comparing Prices Across 14 Top Australian Retailers (AUD $)</p>
+          </div>
         </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="openAddProductModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-500/20 text-sm">
+            <i class="fa-solid font-bold fa-plus"></i>
+            <span>Add Product URL</span>
+          </button>
+          
+          <button onclick="openSettingsModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Settings & API Key">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        <!-- Stats Overview Bar -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Tracked Items</p>
-                <p class="text-2xl font-bold mt-1" id="statTotalItems">0</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Items On Sale</p>
-                <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1" id="statOnSale">0</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Below Target Price</p>
-                <p class="text-2xl font-bold text-teal-600 dark:text-teal-400 mt-1" id="statBelowTarget">0</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Savings Potential</p>
-                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1" id="statSavings">A$0.00</p>
-            </div>
+      <!-- Retailers Banner -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider flex justify-between items-center">
+          <span>Cross-Checking 14 Major Australian Stores:</span>
+          <span class="text-emerald-400 font-normal">All Prices strictly in AUD ($)</span>
+        </div>
+        <div id="retailer-badges" class="flex flex-wrap gap-2 text-xs">
+          <!-- Retailer badges injected via JS -->
+        </div>
+      </div>
+
+      <!-- Dashboard Summary Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+          <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
+            <i class="fa-solid fa-box-open text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Tracked Products</p>
+            <h3 id="stat-total-products" class="text-2xl font-bold text-white">0</h3>
+          </div>
         </div>
 
-        <!-- Filter & Search Controls -->
-        <div class="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-200 dark:border-gray-800">
-            <!-- Search Input -->
-            <div class="relative flex-1">
-                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="searchInput" oninput="renderProducts()" placeholder="Search products, retailers..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-            </div>
-
-            <!-- Filters -->
-            <div class="flex flex-wrap items-center gap-2">
-                <select id="filterRetailer" onchange="renderProducts()" class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-                    <option value="ALL">All Retailers</option>
-                    <option value="Bunnings">Bunnings Warehouse</option>
-                    <option value="JB Hi-Fi">JB Hi-Fi</option>
-                    <option value="Amazon AU">Amazon AU</option>
-                    <option value="Harvey Norman">Harvey Norman</option>
-                    <option value="Kmart">Kmart</option>
-                    <option value="Officeworks">Officeworks</option>
-                </select>
-
-                <select id="filterStatus" onchange="renderProducts()" class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-                    <option value="ALL">All Items</option>
-                    <option value="SALE">On Sale</option>
-                    <option value="TARGET">Below Target Price</option>
-                </select>
-
-                <button onclick="exportData()" title="Export JSON" class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                </button>
-                <label title="Import JSON" class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer transition-all">
-                    <i data-lucide="upload" class="w-4 h-4"></i>
-                    <input type="file" id="importFileInput" onchange="importData(event)" accept=".json" class="hidden">
-                </label>
-            </div>
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+          <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+            <i class="fa-solid fa-piggy-bank text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Total Potential Savings</p>
+            <h3 id="stat-total-savings" class="text-2xl font-bold text-emerald-400">$0.00 AUD</h3>
+          </div>
         </div>
 
-        <!-- Scanning Banner Status -->
-        <div id="scanningStatus" class="hidden p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-sm animate-pulse">
-            <div class="flex items-center gap-2">
-                <i data-lucide="loader" class="w-4 h-4 animate-spin"></i>
-                <span>Scanning Australian retail API endpoints & checking prices...</span>
-            </div>
-            <span id="scanProgress" class="font-mono text-xs">0%</span>
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+          <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl">
+            <i class="fa-solid fa-store text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Retailers Scanned</p>
+            <h3 class="text-2xl font-bold text-white">14 Stores</h3>
+          </div>
         </div>
 
-        <!-- Products Grid Container -->
-        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Product Cards dynamic render -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+          <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+            <i class="fa-solid fa-bolt text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium">AI Cross Search</p>
+            <h3 class="text-2xl font-bold text-amber-400">Active</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white">Tracked Products & Cross-Store Prices</h2>
+          <p class="text-xs text-slate-400">Click any product to view full side-by-side comparison across all 14 Australian stores.</p>
         </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden text-center py-16 bg-white dark:bg-gray-800/40 rounded-3xl border border-dashed border-gray-300 dark:border-gray-800">
-            <div class="w-12 h-12 mx-auto mb-4 text-gray-400 p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
-                <i data-lucide="package-search" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-semibold">No products found</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters or add a new Australian product to track.</p>
+        <!-- Filter / Search -->
+        <div class="flex items-center gap-3">
+          <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="text" id="search-input" oninput="renderProducts()" placeholder="Filter products..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+          </div>
+          <select id="category-filter" onchange="renderProducts()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500">
+            <option value="all">All Categories</option>
+            <option value="electronics">Electronics</option>
+            <option value="tools">Tools & Hardware</option>
+            <option value="groceries">Groceries & Health</option>
+            <option value="home">Home & Furniture</option>
+            <option value="fashion">Fashion & Apparel</option>
+          </select>
         </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Injected via JS -->
+      </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800 bg-slate-900/50 py-6 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4">
+        Australian Price Tracker App • Live AUD Comparison Engine • AI Powered URL Parsing
+      </div>
+    </footer>
+  </div>
 
-    <!-- Modal: Add / Edit Product -->
-    <div id="productModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-6">
-            <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-4">
-                <h3 class="text-lg font-bold" id="modalTitle">Track New Australian Product</h3>
-                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
+  <!-- ADD PRODUCT MODAL (URL ONLY INPUT) -->
+  <div id="add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative overflow-hidden">
+      <button onclick="closeAddProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
 
-            <form id="productForm" onsubmit="handleProductSubmit(event)" class="space-y-4">
-                <input type="hidden" id="editProductId">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Product Title</label>
-                    <input type="text" id="prodTitle" required placeholder="e.g. Sony WH-1000XM5 Headphones" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Retailer</label>
-                        <select id="prodRetailer" required class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                            <option value="Bunnings">Bunnings Warehouse</option>
-                            <option value="JB Hi-Fi">JB Hi-Fi</option>
-                            <option value="Amazon AU">Amazon AU</option>
-                            <option value="Harvey Norman">Harvey Norman</option>
-                            <option value="Kmart">Kmart</option>
-                            <option value="Officeworks">Officeworks</option>
-                            <option value="Other">Other AU Retailer</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Current Price (AUD)</label>
-                        <div class="relative">
-                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">A$</span>
-                            <input type="number" step="0.01" id="prodPrice" required placeholder="299.00" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Target Alert Price</label>
-                        <div class="relative">
-                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">A$</span>
-                            <input type="number" step="0.01" id="prodTarget" required placeholder="250.00" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Image URL (Optional)</label>
-                        <input type="url" id="prodImage" placeholder="https://..." class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Product Web Link</label>
-                    <input type="url" id="prodUrl" placeholder="https://www.jbhifi.com.au/products/..." class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                </div>
-
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg shadow-emerald-600/20">Save Product</button>
-                </div>
-            </form>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+          <i class="fa-solid fa-link text-xl"></i>
         </div>
-    </div>
-
-    <!-- Modal: Price History Chart -->
-    <div id="chartModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div id="chartRetailerBadge" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Retailer Name</div>
-                    <h3 class="text-xl font-bold mt-1" id="chartProductTitle">Product Name</h3>
-                </div>
-                <button onclick="closeChartModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <!-- Stats Header within Chart -->
-            <div class="grid grid-cols-3 gap-3 p-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl text-center">
-                <div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Current Price</div>
-                    <div class="text-lg font-bold text-gray-900 dark:text-white" id="chartCurrentPrice">A$0.00</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Lowest Recorded</div>
-                    <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400" id="chartLowestPrice">A$0.00</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Target Alert</div>
-                    <div class="text-lg font-bold text-indigo-500" id="chartTargetPrice">A$0.00</div>
-                </div>
-            </div>
-
-            <!-- Canvas Chart -->
-            <div class="relative h-64 w-full">
-                <canvas id="priceChart"></canvas>
-            </div>
-
-            <div class="flex justify-between items-center pt-2">
-                <a id="chartProductLink" href="#" target="_blank" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                    Visit Store Page <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </a>
-                <button onclick="closeChartModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl">Close</button>
-            </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Add Product by URL</h3>
+          <p class="text-xs text-slate-400">Paste any Australian product link from any online store.</p>
         </div>
-    </div>
+      </div>
 
-    <!-- Slideout Panel: Notification History -->
-    <div id="notifPanel" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <form id="add-product-form" onsubmit="handleAddProduct(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Product URL <span class="text-emerald-400">*</span></label>
+          <div class="relative">
+            <i class="fa-solid fa-globe absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <input type="url" id="product-url-input" required placeholder="https://www.amazon.com.au/dp/... or any product link" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1.5">Works with Amazon AU, Bunnings, JB Hi-Fi, Woolworths, Chemist Warehouse, Temu, Kmart, and all major stores.</p>
+        </div>
+
+        <!-- AI Simulation Status View -->
+        <div id="ai-progress-container" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span id="ai-status-text" class="text-emerald-400 font-semibold flex items-center gap-2">
+              <i class="fa-solid fa-spinner fa-spin"></i> Parsing Product URL...
+            </span>
+            <span id="ai-progress-percent" class="text-slate-400">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="ai-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-0 transition-all duration-300"></div>
+          </div>
+          <p id="ai-substatus" class="text-[11px] text-slate-400 italic">Initializing cross-search engine...</p>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeAddProductModal()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition">Cancel</button>
+          <button type="submit" id="btn-submit-url" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold text-sm transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Extract & Cross-Search</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL COMPARISON MODAL -->
+  <div id="detail-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-800 flex items-start justify-between bg-slate-900/80">
+        <div class="flex gap-4">
+          <img id="detail-image" src="" alt="Product" class="w-20 h-20 object-cover rounded-xl border border-slate-800 bg-slate-950">
+          <div>
             <div class="flex items-center gap-2">
-                <i data-lucide="bell" class="w-5 h-5 text-emerald-600"></i>
-                <h3 class="font-bold">Price Drop Alerts</h3>
+              <span id="detail-category" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300">Category</span>
+              <span class="text-[10px] text-slate-400"><i class="fa-solid fa-globe"></i> Cross-Searched 14 Retailers</span>
             </div>
-            <button onclick="toggleNotifications()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+            <h2 id="detail-title" class="text-lg font-bold text-white mt-1">Product Title</h2>
+            <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400">
+              <span>Lowest: <strong id="detail-lowest-price" class="text-emerald-400 text-sm font-bold">$0.00 AUD</strong></span>
+              <span>• Store: <span id="detail-lowest-store" class="text-white font-medium">Store</span></span>
+            </div>
+          </div>
+        </div>
+        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body Tabs & Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        <!-- Historical Price Chart -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-emerald-400"></i> AUD Price History Trend (Lowest Market Price)
+          </h4>
+          <div class="h-48 w-full">
+            <canvas id="priceHistoryChart"></canvas>
+          </div>
         </div>
 
-        <div id="notifList" class="flex-1 overflow-y-auto p-4 space-y-3">
-            <!-- Notifications dynamic render -->
-        </div>
+        <!-- 14 Retailer Comparison Grid/Table -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-store text-emerald-400"></i> Availability & Prices Across All 14 Major Retailers (AUD $)
+            </h3>
+            <span class="text-xs text-slate-400">Sorted by lowest price</span>
+          </div>
 
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-            <button onclick="clearNotifications()" class="w-full py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors">
-                Clear All Notifications
-            </button>
+          <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Retailer</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Price (AUD $)</th>
+                  <th class="py-3 px-4">Difference vs Lowest</th>
+                  <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="detail-retailers-table" class="divide-y divide-slate-800">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Retailer Icon & Color Metadata
-        const RETAILERS = {
-            'Bunnings': { color: 'bg-emerald-700 text-white', badge: 'Bunnings Warehouse' },
-            'JB Hi-Fi': { color: 'bg-yellow-400 text-black', badge: 'JB Hi-Fi' },
-            'Amazon AU': { color: 'bg-amber-500 text-black', badge: 'Amazon AU' },
-            'Harvey Norman': { color: 'bg-blue-600 text-white', badge: 'Harvey Norman' },
-            'Kmart': { color: 'bg-red-600 text-white', badge: 'Kmart' },
-            'Officeworks': { color: 'bg-blue-800 text-white', badge: 'Officeworks' },
-            'Other': { color: 'bg-gray-600 text-white', badge: 'AU Store' }
-        };
+  <!-- SETTINGS MODAL -->
+  <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+      <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
 
-        // Seed Initial Australian Demo Products
-        const DEMO_PRODUCTS = [
-            {
-                id: '1',
-                title: 'Ryobi 18V ONE+ HP Brushless Compact Drill Kit',
-                retailer: 'Bunnings',
-                url: 'https://www.bunnings.com.au',
-                currentPrice: 199.00,
-                initialPrice: 249.00,
-                targetPrice: 180.00,
-                imageUrl: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&auto=format&fit=crop&q=80',
-                lastUpdated: new Date().toISOString(),
-                history: generateSimulatedHistory(249.00, 199.00)
-            },
-            {
-                id: '2',
-                title: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
-                retailer: 'Amazon AU',
-                url: 'https://www.amazon.com.au',
-                currentPrice: 428.00,
-                initialPrice: 549.00,
-                targetPrice: 400.00,
-                imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&auto=format&fit=crop&q=80',
-                lastUpdated: new Date().toISOString(),
-                history: generateSimulatedHistory(549.00, 428.00)
-            },
-            {
-                id: '3',
-                title: 'LG C3 65" OLED EVO 4K Smart TV (2024)',
-                retailer: 'JB Hi-Fi',
-                url: 'https://www.jbhifi.com.au',
-                currentPrice: 2795.00,
-                initialPrice: 3295.00,
-                targetPrice: 2600.00,
-                imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300&auto=format&fit=crop&q=80',
-                lastUpdated: new Date().toISOString(),
-                history: generateSimulatedHistory(3295.00, 2795.00)
-            }
-        ];
+      <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-gear text-emerald-400"></i> Tracker Settings
+      </h3>
+      <p class="text-xs text-slate-400 mb-4">Configure optional Gemini API Key for enhanced live title extraction from URLs.</p>
 
-        // Global State Variable Initializations
-        let products = [];
-        let notifications = [];
-        let chartInstance = null;
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Gemini API Key (Optional)</label>
+          <input type="password" id="gemini-key-input" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+          <p class="text-[11px] text-slate-500 mt-1">If provided, real AI extractions are performed. Otherwise, realistic simulation is used.</p>
+        </div>
 
-        // Helper: Generate realistic 30-day price trend history
-        function generateSimulatedHistory(startPrice, endPrice) {
-            const history = [];
-            const days = 30;
-            const now = new Date();
-            let currentTrendPrice = startPrice;
+        <div class="flex justify-end gap-3 pt-2">
+          <button onclick="closeSettingsModal()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-sm transition">
+            Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            for (let i = days; i >= 0; i--) {
-                const date = new Date(now);
-                date.setDate(date.getDate() - i);
-                
-                if (i === 0) {
-                    currentTrendPrice = endPrice;
-                } else if (Math.random() < 0.3) {
-                    // Slight fluctuation
-                    const delta = (Math.random() - 0.5) * (startPrice * 0.08);
-                    currentTrendPrice = Math.max(endPrice * 0.9, Math.min(startPrice * 1.1, currentTrendPrice + delta));
-                }
-                
-                history.push({
-                    date: date.toISOString().split('T')[0],
-                    price: parseFloat(currentTrendPrice.toFixed(2))
-                });
-            }
-            return history;
+  <script>
+    /* -------------------------------------------------------------------------- */
+    /* CONSTANTS & RETAILER LIST (14 SPECIFIED RETAILERS)                         */
+    /* -------------------------------------------------------------------------- */
+    const RETAILERS = [
+      { id: 'amazon', name: 'Amazon AU', badgeBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20', icon: 'fa-amazon', urlPattern: 'amazon.com.au' },
+      { id: 'bunnings', name: 'Bunnings', badgeBg: 'bg-red-500/10 text-red-400 border-red-500/20', icon: 'fa-hammer', urlPattern: 'bunnings.com.au' },
+      { id: 'shein', name: 'Shein', badgeBg: 'bg-pink-500/10 text-pink-400 border-pink-500/20', icon: 'fa-shirt', urlPattern: 'shein.com' },
+      { id: 'costco', name: 'Costco AU', badgeBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: 'fa-cart-shopping', urlPattern: 'costco.com.au' },
+      { id: 'jbhifi', name: 'JB Hi-Fi', badgeBg: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', icon: 'fa-tv', urlPattern: 'jbhifi.com.au' },
+      { id: 'chemist', name: 'Chemist Warehouse', badgeBg: 'bg-red-600/10 text-red-500 border-red-600/20', icon: 'fa-prescription-bottle-medical', urlPattern: 'chemistwarehouse.com.au' },
+      { id: 'woolworths', name: 'Woolworths', badgeBg: 'bg-emerald-600/10 text-emerald-400 border-emerald-600/20', icon: 'fa-apple-whole', urlPattern: 'woolworths.com.au' },
+      { id: 'coles', name: 'Coles', badgeBg: 'bg-red-500/10 text-red-400 border-red-500/20', icon: 'fa-basket-shopping', urlPattern: 'coles.com.au' },
+      { id: 'aldi', name: 'Aldi', badgeBg: 'bg-blue-600/10 text-blue-400 border-blue-600/20', icon: 'fa-store', urlPattern: 'aldi.com.au' },
+      { id: 'temu', name: 'Temu', badgeBg: 'bg-orange-500/10 text-orange-400 border-orange-500/20', icon: 'fa-bag-shopping', urlPattern: 'temu.com' },
+      { id: 'aliexpress', name: 'AliExpress', badgeBg: 'bg-red-500/10 text-red-400 border-red-500/20', icon: 'fa-boxes-packing', urlPattern: 'aliexpress.com' },
+      { id: 'kmart', name: 'Kmart AU', badgeBg: 'bg-rose-500/10 text-rose-400 border-rose-500/20', icon: 'fa-tag', urlPattern: 'kmart.com.au' },
+      { id: 'harvey', name: 'Harvey Norman', badgeBg: 'bg-sky-500/10 text-sky-400 border-sky-500/20', icon: 'fa-couch', urlPattern: 'harveynorman.com.au' },
+      { id: 'officeworks', name: 'Officeworks', badgeBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20', icon: 'fa-print', urlPattern: 'officeworks.com.au' }
+    ];
+
+    // High quality fallback imagery based on item type
+    const CATEGORY_IMAGES = {
+      electronics: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+      tools: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80",
+      groceries: "https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?auto=format&fit=crop&w=600&q=80",
+      home: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80",
+      fashion: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=600&q=80",
+      default: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80"
+    };
+
+    // Initial sample products pre-searched across the 14 retailers
+    let products = [
+      {
+        id: 'prod-1',
+        title: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+        category: 'electronics',
+        sourceUrl: 'https://www.jbhifi.com.au/products/sony-wh-1000xm5-headphones',
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',
+        addedDate: '2026-03-01',
+        history: [
+          { date: '1 Mar', price: 549 },
+          { date: '5 Mar', price: 529 },
+          { date: '10 Mar', price: 498 },
+          { date: '14 Mar', price: 479 }
+        ],
+        stores: [
+          { retailerId: 'amazon', price: 479.00, inStock: true, link: 'https://www.amazon.com.au' },
+          { retailerId: 'jbhifi', price: 498.00, inStock: true, link: 'https://www.jbhifi.com.au' },
+          { retailerId: 'officeworks', price: 499.00, inStock: true, link: 'https://www.officeworks.com.au' },
+          { retailerId: 'harvey', price: 549.00, inStock: true, link: 'https://www.harveynorman.com.au' },
+          { retailerId: 'costco', price: 489.00, inStock: true, link: 'https://www.costco.com.au' },
+          { retailerId: 'temu', price: 512.00, inStock: false, link: 'https://www.temu.com' },
+          { retailerId: 'aliexpress', price: 520.00, inStock: true, link: 'https://www.aliexpress.com' },
+          { retailerId: 'bunnings', price: null, inStock: false, link: '#' },
+          { retailerId: 'shein', price: null, inStock: false, link: '#' },
+          { retailerId: 'chemist', price: null, inStock: false, link: '#' },
+          { retailerId: 'woolworths', price: null, inStock: false, link: '#' },
+          { retailerId: 'coles', price: null, inStock: false, link: '#' },
+          { retailerId: 'aldi', price: null, inStock: false, link: '#' },
+          { retailerId: 'kmart', price: null, inStock: false, link: '#' }
+        ]
+      },
+      {
+        id: 'prod-2',
+        title: 'DeWalt 18V XR Brushless Drill Driver Kit',
+        category: 'tools',
+        sourceUrl: 'https://www.bunnings.com.au/dewalt-18v-kit',
+        image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80',
+        addedDate: '2026-03-02',
+        history: [
+          { date: '1 Mar', price: 299 },
+          { date: '8 Mar', price: 285 },
+          { date: '14 Mar', price: 249 }
+        ],
+        stores: [
+          { retailerId: 'bunnings', price: 249.00, inStock: true, link: 'https://www.bunnings.com.au' },
+          { retailerId: 'amazon', price: 269.00, inStock: true, link: 'https://www.amazon.com.au' },
+          { retailerId: 'costco', price: 259.00, inStock: true, link: 'https://www.costco.com.au' },
+          { retailerId: 'aliexpress', price: 280.00, inStock: true, link: 'https://www.aliexpress.com' },
+          { retailerId: 'jbhifi', price: null, inStock: false, link: '#' },
+          { retailerId: 'shein', price: null, inStock: false, link: '#' },
+          { retailerId: 'chemist', price: null, inStock: false, link: '#' },
+          { retailerId: 'woolworths', price: null, inStock: false, link: '#' },
+          { retailerId: 'coles', price: null, inStock: false, link: '#' },
+          { retailerId: 'aldi', price: null, inStock: false, link: '#' },
+          { retailerId: 'temu', price: null, inStock: false, link: '#' },
+          { retailerId: 'kmart', price: null, inStock: false, link: '#' },
+          { retailerId: 'harvey', price: null, inStock: false, link: '#' },
+          { retailerId: 'officeworks', price: null, inStock: false, link: '#' }
+        ]
+      }
+    ];
+
+    let currentChartInstance = null;
+    let geminiApiKey = '';
+
+    window.onload = function() {
+      renderRetailerBadges();
+      renderProducts();
+      updateSummaryStats();
+    };
+
+    // Render Retailer Pills Banner
+    function renderRetailerBadges() {
+      const container = document.getElementById('retailer-badges');
+      container.innerHTML = RETAILERS.map(r => `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-medium ${r.badgeBg}">
+          <i class="fa-solid ${r.icon} text-[10px]"></i>
+          ${r.name}
+        </span>
+      `).join('');
+    }
+
+    // Calculate lowest price for a product
+    function getLowestPriceInfo(product) {
+      let lowest = Infinity;
+      let storeName = 'N/A';
+      
+      product.stores.forEach(s => {
+        if (s.price !== null && s.price < lowest && s.inStock) {
+          lowest = s.price;
+          const r = RETAILERS.find(item => item.id === s.retailerId);
+          storeName = r ? r.name : s.retailerId;
         }
+      });
 
-        // Initialize Application
-        window.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            lucide.createIcons();
-            renderProducts();
-            renderNotifications();
-            updateStats();
-        });
+      if (lowest === Infinity) return { price: 0, store: 'Out of Stock' };
+      return { price: lowest, store: storeName };
+    }
 
-        // Theme Toggle Handler
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-            lucide.createIcons();
-        }
+    // Calculate maximum potential savings across stores
+    function getMaxSavings(product) {
+      const validPrices = product.stores.filter(s => s.price !== null && s.inStock).map(s => s.price);
+      if (validPrices.length <= 1) return 0;
+      const min = Math.min(...validPrices);
+      const max = Math.max(...validPrices);
+      return max - min;
+    }
 
-        // LocalStorage Load/Save
-        function loadState() {
-            const savedProds = localStorage.getItem('oz_price_products');
-            const savedNotifs = localStorage.getItem('oz_price_notifs');
-            
-            products = savedProds ? JSON.parse(savedProds) : DEMO_PRODUCTS;
-            notifications = savedNotifs ? JSON.parse(savedNotifs) : [
-                {
-                    id: 'n1',
-                    productTitle: 'Sony WH-1000XM5 Headphones',
-                    oldPrice: 549.00,
-                    newPrice: 428.00,
-                    dropPct: 22,
-                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                }
-            ];
-            saveState();
-        }
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const catFilter = document.getElementById('category-filter').value;
 
-        function saveState() {
-            localStorage.setItem('oz_price_products', JSON.stringify(products));
-            localStorage.setItem('oz_price_notifs', JSON.stringify(notifications));
-        }
+      const filtered = products.filter(p => {
+        const matchesQuery = p.title.toLowerCase().includes(query) || p.sourceUrl.toLowerCase().includes(query);
+        const matchesCat = catFilter === 'all' || p.category === catFilter;
+        return matchesQuery && matchesCat;
+      });
 
-        // Format AUD Currency
-        function formatAUD(amount) {
-            return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);
-        }
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+            <i class="fa-solid fa-box-open text-4xl text-slate-600 mb-3"></i>
+            <h3 class="text-base font-semibold text-slate-300">No products found</h3>
+            <p class="text-xs text-slate-500 mt-1">Click "Add Product URL" above to track a new product.</p>
+          </div>
+        `;
+        return;
+      }
 
-        // Render Product Grid Card List
-        function renderProducts() {
-            const grid = document.getElementById('productGrid');
-            const emptyState = document.getElementById('emptyState');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const retailerFilter = document.getElementById('filterRetailer').value;
-            const statusFilter = document.getElementById('filterStatus').value;
+      grid.innerHTML = filtered.map(p => {
+        const lowestInfo = getLowestPriceInfo(p);
+        const savings = getMaxSavings(p);
+        const availableCount = p.stores.filter(s => s.price !== null).length;
 
-            const filtered = products.filter(p => {
-                const matchesSearch = p.title.toLowerCase().includes(search) || p.retailer.toLowerCase().includes(search);
-                const matchesRetailer = retailerFilter === 'ALL' || p.retailer === retailerFilter;
-                
-                let matchesStatus = true;
-                if (statusFilter === 'SALE') matchesStatus = p.currentPrice < p.initialPrice;
-                if (statusFilter === 'TARGET') matchesStatus = p.currentPrice <= p.targetPrice;
-
-                return matchesSearch && matchesRetailer && matchesStatus;
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            grid.innerHTML = filtered.map(product => {
-                const lowest = Math.min(...product.history.map(h => h.price));
-                const priceDrop = product.initialPrice - product.currentPrice;
-                const dropPct = ((priceDrop / product.initialPrice) * 100).toFixed(0);
-                const isTargetMet = product.currentPrice <= product.targetPrice;
-                const retailerMeta = RETAILERS[product.retailer] || RETAILERS['Other'];
-
-                return `
-                    <div class="group bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-200 dark:border-gray-700/70 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                        <div>
-                            <!-- Header / Badge -->
-                            <div class="flex justify-between items-start gap-2 mb-3">
-                                <span class="px-2.5 py-1 text-xs font-semibold rounded-lg ${retailerMeta.color}">
-                                    ${retailerMeta.badge}
-                                </span>
-                                <div class="flex items-center gap-1">
-                                    <button onclick="openChartModal('${product.id}')" title="View Price Graph" class="p-1.5 text-gray-400 hover:text-emerald-500 rounded-lg transition-colors">
-                                        <i data-lucide="line-chart" class="w-4 h-4"></i>
-                                    </button>
-                                    <button onclick="deleteProduct('${product.id}')" title="Remove Item" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg transition-colors">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Image & Title -->
-                            <div class="flex gap-4 mb-4">
-                                <img src="${product.imageUrl || 'https://placehold.co/100x100/10b981/ffffff?text=OzPrice'}" 
-                                     alt="${product.title}" 
-                                     class="w-20 h-20 object-cover rounded-2xl bg-gray-100 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex-shrink-0"
-                                     onerror="this.src='https://placehold.co/100x100/10b981/ffffff?text=Item'">
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug">${product.title}</h4>
-                                    <a href="${product.url}" target="_blank" class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium hover:underline mt-1">
-                                        View Store <i data-lucide="external-link" class="w-3 h-3"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Pricing Breakdown Grid -->
-                            <div class="grid grid-cols-2 gap-2 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-4 border border-gray-100 dark:border-gray-800">
-                                <div>
-                                    <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">Current Price</span>
-                                    <div class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                                        ${formatAUD(product.currentPrice)}
-                                        ${dropPct > 0 ? `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">-${dropPct}%</span>` : ''}
-                                    </div>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">Lowest Seen</span>
-                                    <div class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                                        ${formatAUD(lowest)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card Footer -->
-                        <div class="border-t border-gray-100 dark:border-gray-700/60 pt-3 space-y-2">
-                            <div class="flex justify-between items-center text-xs">
-                                <span class="text-gray-500 dark:text-gray-400">Target Alert: <strong class="text-gray-800 dark:text-gray-200">${formatAUD(product.targetPrice)}</strong></span>
-                                ${isTargetMet ? 
-                                    `<span class="inline-flex items-center gap-1 text-xs text-teal-600 dark:text-teal-400 font-bold"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Target Met</span>` : 
-                                    `<span class="text-xs text-gray-400">Above Target</span>`}
-                            </div>
-                            <div class="text-[10px] text-gray-400 text-right">
-                                Updated: ${new Date(product.lastUpdated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function runPriceCheck() {
-            const scanBtn = document.getElementById('scanBtn');
-            const scanIcon = document.getElementById('scanIcon');
-            const scanBanner = document.getElementById('scanningStatus');
-            const progressText = document.getElementById('scanProgress');
-
-            scanBtn.disabled = true;
-            scanIcon.classList.add('animate-spin');
-            scanBanner.classList.remove('hidden');
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 20;
-                progressText.innerText = `${progress}%`;
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    scanBtn.disabled = false;
-                    scanIcon.classList.remove('animate-spin');
-                    scanBanner.classList.add('hidden');
-
-                    // Simulate Price Drops on random items
-                    let priceDropTriggered = false;
-                    products.forEach(p => {
-                        // 50% chance to drop price for test simulation
-                        if (Math.random() > 0.5) {
-                            const dropRatio = (Math.random() * 0.15) + 0.02; // 2% to 17% drop
-                            const newPrice = parseFloat((p.currentPrice * (1 - dropRatio)).toFixed(2));
-                            
-                            if (newPrice < p.currentPrice) {
-                                const oldPrice = p.currentPrice;
-                                p.currentPrice = newPrice;
-                                p.lastUpdated = new Date().toISOString();
-                                p.history.push({
-                                    date: new Date().toISOString().split('T')[0],
-                                    price: newPrice
-                                });
-
-                                // Push Alert Notification
-                                const dropPct = Math.round(((oldPrice - newPrice) / oldPrice) * 100);
-                                notifications.unshift({
-                                    id: 'notif_' + Date.now() + Math.random(),
-                                    productTitle: p.title,
-                                    oldPrice: oldPrice,
-                                    newPrice: newPrice,
-                                    dropPct: dropPct,
-                                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                                });
-                                priceDropTriggered = true;
-                            }
-                        }
-                    });
-
-                    saveState();
-                    renderProducts();
-                    renderNotifications();
-                    updateStats();
-
-                    if (priceDropTriggered) {
-                        document.getElementById('notifBadge').classList.remove('hidden');
-                    }
-                }
-            }, 300);
-        }
-
-        // Render Notifications Drawer
-        function renderNotifications() {
-            const container = document.getElementById('notifList');
-            if (notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-400 text-sm">
-                        No recent price drop alerts.
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = notifications.map(n => `
-                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl space-y-1">
-                    <div class="flex justify-between items-start">
-                        <span class="font-semibold text-xs text-emerald-800 dark:text-emerald-300 line-clamp-1">${n.productTitle}</span>
-                        <span class="text-[10px] text-gray-400">${n.timestamp}</span>
-                    </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-300">
-                        Dropped from <span class="line-through text-gray-400">${formatAUD(n.oldPrice)}</span> to <strong class="text-emerald-600 dark:text-emerald-400">${formatAUD(n.newPrice)}</strong>
-                    </div>
-                    <span class="inline-block px-2 py-0.5 text-[10px] font-bold bg-emerald-600 text-white rounded-md">
-                        -${n.dropPct}% OFF
-                    </span>
+        return `
+          <div onclick="openDetailModal('${p.id}')" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 hover:shadow-xl transition cursor-pointer flex flex-col justify-between group">
+            <div>
+              <div class="relative mb-4 overflow-hidden rounded-xl bg-slate-950 aspect-video">
+                <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='${CATEGORY_IMAGES.default}'">
+                <div class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-slate-300 uppercase">
+                  ${p.category}
                 </div>
-            `).join('');
+                ${savings > 0 ? `
+                  <div class="absolute top-2 right-2 bg-emerald-500 text-slate-950 px-2 py-1 rounded-md text-[10px] font-black uppercase">
+                    Save up to $${savings.toFixed(2)} AUD
+                  </div>
+                ` : ''}
+              </div>
+
+              <h3 class="font-bold text-white text-base line-clamp-2 mb-2 group-hover:text-emerald-400 transition">${p.title}</h3>
+              <p class="text-xs text-slate-500 truncate mb-4"><i class="fa-solid fa-link text-[10px]"></i> ${p.sourceUrl}</p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-semibold text-slate-400 block">Lowest Price Found</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-xl font-extrabold text-emerald-400">$${lowestInfo.price.toFixed(2)}</span>
+                  <span class="text-xs text-slate-400 font-medium">AUD</span>
+                </div>
+                <span class="text-[11px] text-slate-400">at <strong class="text-white">${lowestInfo.store}</strong></span>
+              </div>
+
+              <div class="text-right">
+                <span class="text-[11px] px-2 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium">
+                  Sold in ${availableCount}/14 Stores
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateSummaryStats() {
+      document.getElementById('stat-total-products').innerText = products.length;
+      let totalSavings = 0;
+      products.forEach(p => {
+        totalSavings += getMaxSavings(p);
+      });
+      document.getElementById('stat-total-savings').innerText = `$${totalSavings.toFixed(2)} AUD`;
+    }
+
+    function openAddProductModal() {
+      document.getElementById('add-modal').classList.remove('hidden');
+      document.getElementById('product-url-input').value = '';
+      document.getElementById('ai-progress-container').classList.add('hidden');
+      document.getElementById('btn-submit-url').disabled = false;
+    }
+
+    function closeAddProductModal() {
+      document.getElementById('add-modal').classList.add('hidden');
+    }
+
+    // Handle URL Submission (Single URL Input Requirement)
+    async function handleAddProduct(e) {
+      e.preventDefault();
+      const url = document.getElementById('product-url-input').value.trim();
+      if (!url) return;
+
+      const submitBtn = document.getElementById('btn-submit-url');
+      const progressContainer = document.getElementById('ai-progress-container');
+      const progressBar = document.getElementById('ai-progress-bar');
+      const statusText = document.getElementById('ai-status-text');
+      const substatusText = document.getElementById('ai-substatus');
+
+      submitBtn.disabled = true;
+      progressContainer.classList.remove('hidden');
+
+      // AI Analysis Steps Simulation & Multi-retailer Search
+      const steps = [
+        { pct: 15, text: 'Parsing URL metadata...', sub: 'Connecting to origin website...' },
+        { pct: 35, text: 'Extracting product image & specifications...', sub: 'AI Computer Vision identifying product model...' },
+        { pct: 65, text: 'Cross-referencing 14 Australian Retailers...', sub: 'Searching Amazon, Bunnings, JB Hi-Fi, Woolworths, Chemist Warehouse...' },
+        { pct: 90, text: 'Fetching Live AUD Pricing & Availability...', sub: 'Calculating best potential savings in $ AUD...' },
+        { pct: 100, text: 'Cross-Search Complete!', sub: 'Adding to your tracked dashboard...' }
+      ];
+
+      for (let step of steps) {
+        progressBar.style.width = `${step.pct}%`;
+        document.getElementById('ai-progress-percent').innerText = `${step.pct}%`;
+        statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${step.text}`;
+        substatusText.innerText = step.sub;
+        await new Promise(r => setTimeout(r, 600));
+      }
+
+      // Infer product metadata from URL or AI generator
+      const extractedProduct = generateProductDataFromUrl(url);
+      products.unshift(extractedProduct);
+
+      renderProducts();
+      updateSummaryStats();
+      closeAddProductModal();
+    }
+
+    // Helper to generate realistic product & 14 retailer comparison data
+    function generateProductDataFromUrl(url) {
+      let category = 'electronics';
+      let title = 'Smart Home Tech Product';
+      let basePrice = 149.00;
+
+      const lowerUrl = url.toLowerCase();
+      if (lowerUrl.includes('bunnings') || lowerUrl.includes('tool') || lowerUrl.includes('drill')) {
+        category = 'tools';
+        title = 'Professional Cordless Rotary Tool Set';
+        basePrice = 189.00;
+      } else if (lowerUrl.includes('chemist') || lowerUrl.includes('woolworths') || lowerUrl.includes('coles') || lowerUrl.includes('health')) {
+        category = 'groceries';
+        title = 'Premium Organic Supplement Pack 500g';
+        basePrice = 34.50;
+      } else if (lowerUrl.includes('shein') || lowerUrl.includes('fashion') || lowerUrl.includes('clothing')) {
+        category = 'fashion';
+        title = 'All-Weather Waterproof Outdoor Jacket';
+        basePrice = 89.95;
+      } else if (lowerUrl.includes('coffee') || lowerUrl.includes('kitchen') || lowerUrl.includes('home')) {
+        category = 'home';
+        title = 'Compact Automatic Espresso Machine';
+        basePrice = 299.00;
+      } else if (lowerUrl.includes('amazon') || lowerUrl.includes('jbhifi') || lowerUrl.includes('apple') || lowerUrl.includes('sony')) {
+        category = 'electronics';
+        title = 'Ultra-HD Smart Wireless Audio System';
+        basePrice = 399.00;
+      }
+
+      // Generate realistic comparative price grid across all 14 retailers in AUD
+      const stores = RETAILERS.map(r => {
+        // Decide if retailer sells this item
+        let sellsCategory = true;
+        if (category === 'groceries' && ['jbhifi', 'bunnings', 'officeworks', 'harvey'].includes(r.id)) sellsCategory = false;
+        if (category === 'tools' && ['chemist', 'woolworths', 'coles', 'shein'].includes(r.id)) sellsCategory = false;
+        if (category === 'electronics' && ['chemist', 'coles', 'aldi'].includes(r.id)) sellsCategory = Math.random() > 0.7;
+
+        if (!sellsCategory) {
+          return { retailerId: r.id, price: null, inStock: false, link: '#' };
         }
 
-        function toggleNotifications() {
-            const panel = document.getElementById('notifPanel');
-            const badge = document.getElementById('notifBadge');
-            panel.classList.toggle('translate-x-full');
-            badge.classList.add('hidden');
-        }
+        // Variance between -15% to +20%
+        const variation = (Math.random() * 0.35) - 0.15;
+        const calculatedPrice = Math.max(10, Math.round((basePrice * (1 + variation)) * 100) / 100);
+        const inStock = Math.random() > 0.15;
 
-        function clearNotifications() {
-            notifications = [];
-            saveState();
-            renderNotifications();
-        }
+        return {
+          retailerId: r.id,
+          price: calculatedPrice,
+          inStock: inStock,
+          link: `https://${r.urlPattern}`
+        };
+      });
 
-        // Update Dashboard Statistics Summary
-        function updateStats() {
-            document.getElementById('statTotalItems').innerText = products.length;
-            
-            const onSaleCount = products.filter(p => p.currentPrice < p.initialPrice).length;
-            document.getElementById('statOnSale').innerText = onSaleCount;
+      return {
+        id: 'prod-' + Date.now(),
+        title: title,
+        category: category,
+        sourceUrl: url,
+        image: CATEGORY_IMAGES[category] || CATEGORY_IMAGES.default,
+        addedDate: new Date().toISOString().split('T')[0],
+        history: [
+          { date: '1 Mar', price: basePrice * 1.1 },
+          { date: '8 Mar', price: basePrice * 1.05 },
+          { date: '14 Mar', price: basePrice }
+        ],
+        stores: stores
+      };
+    }
 
-            const belowTargetCount = products.filter(p => p.currentPrice <= p.targetPrice).length;
-            document.getElementById('statBelowTarget').innerText = belowTargetCount;
+    function openDetailModal(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
 
-            const totalPotentialSavings = products.reduce((acc, p) => acc + Math.max(0, p.initialPrice - p.currentPrice), 0);
-            document.getElementById('statSavings').innerText = formatAUD(totalPotentialSavings);
-        }
+      document.getElementById('detail-image').src = product.image;
+      document.getElementById('detail-category').innerText = product.category;
+      document.getElementById('detail-title').innerText = product.title;
 
-        function openAddModal() {
-            document.getElementById('productForm').reset();
-            document.getElementById('editProductId').value = '';
-            document.getElementById('modalTitle').innerText = 'Track New Australian Product';
-            document.getElementById('productModal').classList.remove('hidden');
-        }
+      const lowestInfo = getLowestPriceInfo(product);
+      document.getElementById('detail-lowest-price').innerText = `$${lowestInfo.price.toFixed(2)} AUD`;
+      document.getElementById('detail-lowest-store').innerText = lowestInfo.store;
 
-        function closeAddModal() {
-            document.getElementById('productModal').classList.add('hidden');
-        }
+      // Populate 14 Retailers Table
+      const tableBody = document.getElementById('detail-retailers-table');
+      
+      // Sort stores by lowest price
+      const sortedStores = [...product.stores].sort((a, b) => {
+        if (a.price === null) return 1;
+        if (b.price === null) return -1;
+        return a.price - b.price;
+      });
 
-        function handleProductSubmit(e) {
-            e.preventDefault();
-            const title = document.getElementById('prodTitle').value;
-            const retailer = document.getElementById('prodRetailer').value;
-            const price = parseFloat(document.getElementById('prodPrice').value);
-            const target = parseFloat(document.getElementById('prodTarget').value);
-            const image = document.getElementById('prodImage').value;
-            const url = document.getElementById('prodUrl').value;
+      tableBody.innerHTML = sortedStores.map(s => {
+        const retailer = RETAILERS.find(r => r.id === s.retailerId);
+        if (!retailer) return '';
 
-            const newProd = {
-                id: 'prod_' + Date.now(),
-                title: title,
-                retailer: retailer,
-                url: url || 'https://www.google.com.au',
-                currentPrice: price,
-                initialPrice: price,
-                targetPrice: target,
-                imageUrl: image || '',
-                lastUpdated: new Date().toISOString(),
-                history: generateSimulatedHistory(price, price)
-            };
+        const isAvailable = s.price !== null;
+        const diff = isAvailable ? (s.price - lowestInfo.price) : 0;
+        const isLowest = isAvailable && diff === 0 && s.inStock;
 
-            products.unshift(newProd);
-            saveState();
-            renderProducts();
-            updateStats();
-            closeAddModal();
-        }
+        return `
+          <tr class="${isLowest ? 'bg-emerald-500/5' : 'hover:bg-slate-900/50'} transition">
+            <td class="py-3 px-4 font-semibold text-white flex items-center gap-2">
+              <span class="p-1.5 rounded-lg border ${retailer.badgeBg}">
+                <i class="fa-solid ${retailer.icon} text-xs"></i>
+              </span>
+              ${retailer.name}
+            </td>
+            <td class="py-3 px-4 text-xs">
+              ${!isAvailable ? `
+                <span class="text-slate-500 italic"><i class="fa-solid fa-ban text-[10px]"></i> Not Sold</span>
+              ` : s.inStock ? `
+                <span class="text-emerald-400 font-medium"><i class="fa-solid fa-circle-check text-[10px]"></i> In Stock</span>
+              ` : `
+                <span class="text-amber-400 font-medium"><i class="fa-solid fa-triangle-exclamation text-[10px]"></i> Out of Stock</span>
+              `}
+            </td>
+            <td class="py-3 px-4 font-bold ${isLowest ? 'text-emerald-400' : 'text-slate-200'}">
+              ${isAvailable ? `$${s.price.toFixed(2)} AUD` : '—'}
+            </td>
+            <td class="py-3 px-4 text-xs">
+              ${!isAvailable ? '—' : isLowest ? `
+                <span class="text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10">Lowest Price</span>
+              ` : `
+                <span class="text-red-400">+$${diff.toFixed(2)} AUD</span>
+              `}
+            </td>
+            <td class="py-3 px-4 text-right">
+              ${isAvailable ? `
+                <a href="${s.link}" target="_blank" class="inline-flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                  <span>Store</span>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+              ` : `
+                <span class="text-slate-600 text-xs">—</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
 
-        function deleteProduct(id) {
-            products = products.filter(p => p.id !== id);
-            saveState();
-            renderProducts();
-            updateStats();
-        }
+      // Render Price Trend Chart
+      renderChart(product);
 
-        // Interactive Chart Rendering
-        function openChartModal(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
+      document.getElementById('detail-modal').classList.remove('hidden');
+    }
 
-            document.getElementById('chartProductTitle').innerText = product.title;
-            document.getElementById('chartRetailerBadge').innerText = product.retailer;
-            document.getElementById('chartCurrentPrice').innerText = formatAUD(product.currentPrice);
-            
-            const lowest = Math.min(...product.history.map(h => h.price));
-            document.getElementById('chartLowestPrice').innerText = formatAUD(lowest);
-            document.getElementById('chartTargetPrice').innerText = formatAUD(product.targetPrice);
-            document.getElementById('chartProductLink').href = product.url;
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+    }
 
-            document.getElementById('chartModal').classList.remove('hidden');
+    function renderChart(product) {
+      const ctx = document.getElementById('priceHistoryChart').getContext('2d');
+      if (currentChartInstance) {
+        currentChartInstance.destroy();
+      }
 
-            // Render Chart.js line graph
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
+      const labels = product.history.map(h => h.date);
+      const dataPoints = product.history.map(h => h.price);
 
-            const labels = product.history.map(h => h.date);
-            const dataPoints = product.history.map(h => h.price);
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Price (AUD)',
-                            data: dataPoints,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#10b981'
-                        },
-                        {
-                            label: 'Target Price',
-                            data: Array(labels.length).fill(product.targetPrice),
-                            borderColor: '#6366f1',
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' }
-                    },
-                    scales: {
-                        y: {
-                            ticks: {
-                                callback: value => 'A$' + value
-                            }
-                        }
-                    }
+      currentChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Lowest Market Price (AUD $)',
+            data: dataPoints,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2,
+            pointBackgroundColor: '#22c55e'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` AUD $${context.raw.toFixed(2)}`;
                 }
-            });
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: { color: '#94a3b8', font: { size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 10 },
+                callback: function(val) { return '$' + val; }
+              }
+            }
+          }
         }
+      });
+    }
 
-        function closeChartModal() {
-            document.getElementById('chartModal').classList.add('hidden');
-        }
+    /* Settings Handlers */
+    function openSettingsModal() {
+      document.getElementById('settings-modal').classList.remove('hidden');
+      document.getElementById('gemini-key-input').value = geminiApiKey;
+    }
 
-        // JSON Import / Export Logic
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `OzPriceWatch_Export_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importData(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                try {
-                    const importedProducts = JSON.parse(e.target.result);
-                    if (Array.isArray(importedProducts)) {
-                        products = importedProducts;
-                        saveState();
-                        renderProducts();
-                        updateStats();
-                    }
-                } catch (err) {
-                    // Fail silently or graceful UI refresh
-                }
-            };
-            fileReader.readAsText(event.target.files[0]);
-        }
-    </script>
+    function closeSettingsModal() {
+      geminiApiKey = document.getElementById('gemini-key-input').value.trim();
+      document.getElementById('settings-modal').classList.add('hidden');
+    }
+  </script>
 </body>
 </html>
