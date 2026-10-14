@@ -189,8 +189,8 @@
             <form id="addProductForm" onsubmit="handleAddProduct(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-300 mb-1.5">Product Page URL <span class="text-red-400">*</span></label>
-                    <input type="url" id="inputProductUrl" required placeholder="https://www.bunnings.com.au/ryobi-2030-psi-compact-high-pressure-washer_p0637292" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition">
-                    <p class="text-[11px] text-gray-500 mt-1.5">Supports Bunnings, Amazon AU, JB Hi-Fi, Officeworks, Harvey Norman, Woolworths, Coles, and all major AU sellers.</p>
+                    <input type="url" id="inputProductUrl" required placeholder="https://www.adidas.com.au/runfalcon-3.0-hook-and-loop-shoes/HP5866.html" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition">
+                    <p class="text-[11px] text-gray-500 mt-1.5">Supports Adidas, Bunnings, Amazon AU, JB Hi-Fi, Officeworks, Harvey Norman, and all major AU sellers.</p>
                 </div>
 
                 <div id="urlScanLoader" class="hidden bg-gray-900/80 border border-gray-800 rounded-xl p-4 text-center space-y-2">
@@ -290,6 +290,7 @@
     <!-- APP LOGIC & JAVASCRIPT -->
     <script>
         const DEFAULT_RETAILERS = [
+            { name: "Adidas Australia", domain: "adidas.com.au", searchUrl: "https://www.adidas.com.au/search?q=", icon: "fa-solid fa-shoe-prints", color: "text-white" },
             { name: "Bunnings", domain: "bunnings.com.au", searchUrl: "https://www.bunnings.com.au/search/products?q=", icon: "fa-solid fa-hammer", color: "text-red-500" },
             { name: "Amazon AU", domain: "amazon.com.au", searchUrl: "https://www.amazon.com.au/s?k=", icon: "fa-brands fa-amazon", color: "text-amber-400" },
             { name: "JB Hi-Fi", domain: "jbhifi.com.au", searchUrl: "https://www.jbhifi.com.au/search?query=", icon: "fa-solid fa-tv", color: "text-yellow-400" },
@@ -367,11 +368,10 @@
         }
 
         function getDirectStoreUrl(product, storeName) {
-            // Strictly check if the specific retailer matches the source URL domain
             try {
                 const sourceHost = new URL(product.addedUrl).hostname.toLowerCase();
                 const cleanStoreName = storeName.toLowerCase().replace(/[^a-z]/g, '');
-                if (sourceHost.includes(cleanStoreName)) {
+                if (sourceHost.includes(cleanStoreName) || (sourceHost.includes('adidas') && cleanStoreName.includes('adidas'))) {
                     return product.addedUrl;
                 }
             } catch(e) {}
@@ -399,7 +399,7 @@
                 const storePrices = generateStorePrices(meta.title, urlInput);
 
                 const validPrices = Object.values(storePrices).filter(v => v !== null && v > 0);
-                const lowestPrice = validPrices.length > 0 ? Math.min(...validPrices) : 199.00;
+                const lowestPrice = validPrices.length > 0 ? Math.min(...validPrices) : 42.00;
                 const lowestStore = Object.keys(storePrices).find(key => storePrices[key] === lowestPrice) || meta.sourceStore;
                 const history = generateHistoricalData(lowestPrice);
 
@@ -410,7 +410,7 @@
                     image: meta.image,
                     addedUrl: urlInput,
                     addedDate: new Date().toISOString(),
-                    targetPrice: Math.round(lowestPrice * 0.95),
+                    targetPrice: Math.round(lowestPrice * 0.90),
                     currentLowest: lowestPrice,
                     lowestStore: lowestStore,
                     storePrices: storePrices,
@@ -433,29 +433,38 @@
         function parseProductFromUrl(url) {
             let title = "Australian Tracked Product";
             let category = "General Merchandise";
-            let image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80";
-            let sourceStore = "Bunnings";
+            let image = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80";
+            let sourceStore = "Amazon AU";
 
             const lowerUrl = url.toLowerCase();
 
             try {
                 const urlObj = new URL(url);
-                if (urlObj.hostname.includes('bunnings')) sourceStore = "Bunnings";
+                if (urlObj.hostname.includes('adidas')) sourceStore = "Adidas Australia";
+                else if (urlObj.hostname.includes('bunnings')) sourceStore = "Bunnings";
                 else if (urlObj.hostname.includes('amazon')) sourceStore = "Amazon AU";
                 else if (urlObj.hostname.includes('jbhifi')) sourceStore = "JB Hi-Fi";
                 else if (urlObj.hostname.includes('officeworks')) sourceStore = "Officeworks";
 
-                const pathParts = urlObj.pathname.split('/').filter(p => p.length > 0);
-                if (pathParts.length > 0) {
-                    let rawSlug = pathParts[pathParts.length - 1];
-                    rawSlug = rawSlug.split('_')[0].split('?')[0].replace(/[-_]/g, ' ');
-                    if (rawSlug.length > 4) {
-                        title = rawSlug.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                const pathSegments = urlObj.pathname.split('/').filter(p => p.length > 0);
+                for (let seg of pathSegments) {
+                    if (!seg.endsWith('.html') && !seg.match(/^[a-z0-9]{5,10}$/i) && seg.length > 4) {
+                        title = seg.replace(/[-_]/g, ' ');
+                        break;
                     }
                 }
+                if (title === "Australian Tracked Product" && pathSegments.length > 0) {
+                    let fallbackSeg = pathSegments[0].replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+                    if (fallbackSeg.length > 3) title = fallbackSeg;
+                }
+                title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
             } catch(e) {}
 
-            if (lowerUrl.includes('pressure-washer') || lowerUrl.includes('compact-high-pressure') || lowerUrl.includes('0637292')) {
+            if (lowerUrl.includes('runfalcon') || lowerUrl.includes('hp5866') || lowerUrl.includes('shoes')) {
+                title = "Runfalcon 3.0 Hook and Loop Shoes";
+                category = "Footwear & Kids";
+                image = "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&auto=format&fit=crop&q=80";
+            } else if (lowerUrl.includes('pressure-washer') || lowerUrl.includes('0637292')) {
                 title = "Ryobi 2030 PSI Compact High Pressure Washer";
                 category = "Cleaning & Tools";
                 image = "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&auto=format&fit=crop&q=80";
@@ -473,16 +482,20 @@
             const lowerTitle = productTitle.toLowerCase();
 
             retailers.forEach(r => {
-                prices[r.name] = null; // Default all to not listed
+                prices[r.name] = null;
             });
 
-            if (lowerTitle.includes('pressure washer') || lowerTitle.includes('2030 psi')) {
+            if (lowerTitle.includes('runfalcon') || lowerTitle.includes('shoes')) {
+                prices["Adidas Australia"] = 42.00;
+                prices["Amazon AU"] = 45.00;
+                prices["Kmart"] = 39.00;
+                prices["Temu"] = 38.50;
+            } else if (lowerTitle.includes('pressure washer') || lowerTitle.includes('2030 psi')) {
                 prices["Bunnings"] = 199.00;
                 prices["Amazon AU"] = 215.00;
                 prices["Harvey Norman"] = 219.00;
                 prices["Officeworks"] = 209.00;
                 prices["Temu"] = 189.00;
-                prices["AliExpress"] = 185.00;
             } else if (lowerTitle.includes('sony') || lowerTitle.includes('headphone')) {
                 prices["Bunnings"] = 327.95;
                 prices["Amazon AU"] = 548.00;
@@ -490,13 +503,9 @@
                 prices["JB Hi-Fi"] = 549.00;
                 prices["Harvey Norman"] = 548.00;
                 prices["Officeworks"] = 549.00;
-                prices["Temu"] = 512.00;
-                prices["AliExpress"] = 495.00;
             } else {
-                prices["Bunnings"] = 149.00;
                 prices["Amazon AU"] = 142.50;
-                prices["Officeworks"] = 155.00;
-                prices["JB Hi-Fi"] = 159.00;
+                prices["Bunnings"] = 149.00;
             }
 
             return prices;
@@ -504,10 +513,10 @@
 
         function generateHistoricalData(currentLowest) {
             return [
-                { date: "1 Mar", price: Math.round(currentLowest * 1.12) },
-                { date: "5 Mar", price: Math.round(currentLowest * 1.08) },
-                { date: "10 Mar", price: Math.round(currentLowest * 1.05) },
-                { date: "14 Mar", price: Math.round(currentLowest * 1.02) },
+                { date: "1 Mar", price: Math.round(currentLowest * 1.20) },
+                { date: "5 Mar", price: Math.round(currentLowest * 1.15) },
+                { date: "10 Mar", price: Math.round(currentLowest * 1.10) },
+                { date: "14 Mar", price: Math.round(currentLowest * 1.05) },
                 { date: "Today", price: currentLowest }
             ];
         }
