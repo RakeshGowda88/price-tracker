@@ -1,0 +1,23 @@
+name: My Automation Workflow # Name displayed in the GitHub Actions tab
+
+on:
+  push:
+    branches: [ "main" ] # Triggers when code is pushed to main
+  schedule:
+    - cron: '0 0 * * *' # Optional: Triggers on a schedule (daily at midnight UTC)
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest # Runs on a hosted Linux runner
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4 # Pulls your repository code into the runner
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Script
+        run: python scraper.py # Executes your command or script
